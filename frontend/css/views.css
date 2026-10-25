@@ -1,0 +1,145 @@
+/* ==========================================================
+   views.css
+   Styles that belong to one specific view (page).
+   ========================================================== */
+
+/* ---------- Home: hero ---------- */
+
+.hero {
+  padding-block: clamp(2.5rem, 6vw, 5rem) clamp(3rem, 6vw, 5rem);
+}
+
+.hero__inner {
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+.hero__title {
+  max-width: 14ch;
+  margin-bottom: var(--space-5);
+}
+
+.hero__lead {
+  max-width: 46ch;
+  margin-bottom: var(--space-6);
+  font-size: 1.15rem;
+  color: var(--color-muted);
+}
+
+.hero__media {
+  aspect-ratio: 4 / 3;
+}
+
+@media (min-width: 960px) {
+  .hero__inner {
+    grid-template-columns: 1fr 1.05fr;
+    gap: var(--space-8);
+  }
+
+  .hero__media {
+    aspect-ratio: 4 / 4.6;
+  }
+}
+
+/* ---------- Home: key numbers ---------- */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin: var(--space-7) 0 0;
+  padding: var(--space-5) 0 0;
+  border-top: 1px solid var(--color-line);
+  list-style: none;
+}
+
+.stats strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--color-ink);
+}
+
+.stats span {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+/* ---------- Home: introduction (text + image) ---------- */
+
+.split {
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+@media (min-width: 960px) {
+  .split {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+  }
+
+  .split--reverse > :first-child {
+    order: 2;
+  }
+}
+
+/* ---------- Numbered steps (home preview and How to buy) ---------- */
+
+.steps {
+  display: grid;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+@media (min-width: 640px) {
+  .steps--preview { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1100px) {
+  .steps--preview { grid-template-columns: repeat(4, 1fr); }
+}
+
+.steps > li {
+  counter-increment: step;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-wood-light);
+}
+
+.steps > li::before {
+  content: counter(step, decimal-leading-zero);
+  display: block;
+  margin-bottom: var(--space-3);
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-wood);
+}
+
+.steps h3 {
+  margin-bottom: var(--space-2);
+  font-size: 1.4rem;
+}
+
+.steps p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+.section__footer {
+  margin-top: var(--space-7);
+}
+
+/* ---------- Not found / simple message pages ---------- */
+
+.message-page {
+  max-width: 640px;
+}
