@@ -1,0 +1,48 @@
+# ----------------------------------------
+# Local secrets / configuration
+# ----------------------------------------
+# Real config files contain database passwords and must never be committed.
+# config.example.php (the template with placeholder values) IS committed.
+backend/config/config.php
+!backend/config/config.example.php
+.env
+.env.*
+!.env.example
+
+# ----------------------------------------
+# Backend logs
+# ----------------------------------------
+# Ignore everything inside logs/ except the placeholder that keeps the folder.
+backend/logs/*
+!backend/logs/.gitkeep
+*.log
+
+# ----------------------------------------
+# Dependencies (installed by Composer / npm, never committed)
+# ----------------------------------------
+vendor/
+node_modules/
+
+# ----------------------------------------
+# Generated / cache files
+# ----------------------------------------
+.phpunit.result.cache
+*.cache
+tmp/
+temp/
+
+# ----------------------------------------
+# Database dumps with real data
+# ----------------------------------------
+*.sql.gz
+*.dump
+
+# ----------------------------------------
+# Editor and OS files
+# ----------------------------------------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
