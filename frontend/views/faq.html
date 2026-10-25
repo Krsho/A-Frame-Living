@@ -1,0 +1,36 @@
+<!-- FAQ view. Questions come from js/data/faq.js and are rendered by js/views/faq.js -->
+
+<section class="section section--tight-bottom">
+  <div class="container">
+    <div class="section__header">
+      <p class="eyebrow">FAQ</p>
+      <h1>Frequently asked questions</h1>
+      <p class="lead">
+        Answers to the questions we hear most often – about the models, prices, packages and how buying works.
+      </p>
+    </div>
+    <ul class="jump-links" aria-label="FAQ categories" data-faq-categories></ul>
+  </div>
+</section>
+
+<section class="section section--tight-top">
+  <div class="container faq">
+    <div class="faq__toolbar">
+      <button class="btn btn--ghost btn--sm" type="button" data-faq-expand>Expand all</button>
+      <button class="btn btn--ghost btn--sm" type="button" data-faq-collapse>Collapse all</button>
+    </div>
+    <div data-faq-list></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h2>Didn't find your answer?</h2>
+        <p>Ask us directly – we are happy to help with anything about your future A-frame.</p>
+      </div>
+      <a class="btn btn--light" href="#/contact">Contact us</a>
+    </div>
+  </div>
+</section>

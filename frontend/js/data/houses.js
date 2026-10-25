@@ -23,23 +23,7 @@ function photos(folder, list) {
   return list.map(([file, alt]) => ({ src: `assets/images/${folder}/${file}`, alt }));
 }
 
-// The two packages every model is offered in (descriptions from the owner).
-// `key` matches the keys in each model's `prices` object.
-export const packages = [
-  {
-    key: 'rohBau',
-    name: 'ROH BAU',
-    description:
-      'The house is completely finished on the outside. The interior is left for you to design and finish yourself.',
-  },
-  {
-    key: 'turnkey',
-    name: 'Turnkey',
-    description:
-      'Everything is done except the furniture – including a finished kitchen and bathroom. You just move in with your own furniture.',
-  },
-];
-
+// Prices are per package; the package definitions live in js/data/packages.js.
 export const houses = [
   {
     slug: 'atlantic',

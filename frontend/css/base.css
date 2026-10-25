@@ -74,6 +74,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* The hidden attribute must always hide, even on elements styled as grid/flex */
+[hidden] {
+  display: none !important;
+}
+
 img,
 svg {
   display: block;

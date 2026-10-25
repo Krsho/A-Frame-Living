@@ -1,0 +1,36 @@
+<!-- Admin dashboard (static preview, Milestone 1). One section per database entity (see docs/database-plan.md).
+     Models, packages and locations come from js/data/; inquiries and users are example data from js/data/demo.js. -->
+
+<section class="section section--tight-bottom">
+  <div class="container">
+    <div class="notice notice--info preview-banner">
+      <p class="notice__title">Preview – not functional yet</p>
+      <p id="admin-note">This is how administrators will manage the website. Adding, editing and deleting
+        will work once the backend is connected. Inquiries and users below are example data.</p>
+    </div>
+
+    <div class="section__header">
+      <p class="eyebrow">Admin</p>
+      <h1>Dashboard</h1>
+    </div>
+
+    <ul class="stats stats--flush stats--four">
+      <li><strong data-stat="models"></strong><span>house models</span></li>
+      <li><strong data-stat="projects"></strong><span>completed projects</span></li>
+      <li><strong data-stat="open-inquiries"></strong><span>open inquiries</span></li>
+      <li><strong data-stat="users"></strong><span>registered users</span></li>
+    </ul>
+
+    <ul class="jump-links admin-jump" aria-label="Dashboard sections">
+      <li><a href="#/admin?section=admin-models">House models</a></li>
+      <li><a href="#/admin?section=admin-packages">Packages</a></li>
+      <li><a href="#/admin?section=admin-locations">Locations &amp; projects</a></li>
+      <li><a href="#/admin?section=admin-inquiries">Inquiries</a></li>
+      <li><a href="#/admin?section=admin-users">Users</a></li>
+    </ul>
+  </div>
+</section>
+
+<section class="section section--tight-top">
+  <div class="container admin-sections" data-admin-sections></div>
+</section>

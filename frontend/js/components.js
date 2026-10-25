@@ -7,7 +7,7 @@
  * comes from the API, it cannot inject HTML into the page.
  */
 
-import { packages } from './data/houses.js';
+import { packages } from './data/packages.js';
 
 const priceFormatter = new Intl.NumberFormat('en-IE', {
   style: 'currency',
@@ -104,6 +104,20 @@ export function priceBlock(house) {
       </div>`)
     .join('');
   return `<dl class="prices">${items}</dl>`;
+}
+
+// Inquiry statuses (same values as the planned `inquiries.status` column).
+const inquiryStatusLabels = {
+  new: 'New',
+  in_progress: 'In progress',
+  answered: 'Answered',
+  closed: 'Closed',
+};
+
+/** A coloured label for an inquiry status, e.g. statusBadge('in_progress'). */
+export function statusBadge(status) {
+  const label = inquiryStatusLabels[status] ?? status;
+  return `<span class="status status--${escapeHtml(status)}">${escapeHtml(label)}</span>`;
 }
 
 /**

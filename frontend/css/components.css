@@ -542,7 +542,7 @@
   height: 1px;
 }
 
-.chip-option span {
+.chip-option > span {
   display: inline-flex;
   align-items: center;
   min-height: 40px;
@@ -555,7 +555,7 @@
   transition: background-color var(--transition), border-color var(--transition), color var(--transition);
 }
 
-.chip-option:hover span {
+.chip-option:hover > span {
   border-color: var(--color-green);
 }
 
@@ -601,6 +601,7 @@
 /* ---------- Comparison table ---------- */
 
 .table-scroll {
+  position: relative; /* keeps absolutely positioned children (e.g. hidden labels) inside the scroll box */
   overflow-x: auto;
   background: var(--color-surface);
   border: 1px solid var(--color-line);
@@ -717,6 +718,254 @@
 .packages-heading {
   margin: var(--space-7) 0 var(--space-4);
 }
+
+/* ---------- Forms ---------- */
+
+.form {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.form__title {
+  margin-bottom: 0;
+  font-size: 2rem;
+}
+
+.form__intro {
+  margin: calc(-1 * var(--space-3)) 0 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.form__row {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 640px) {
+  .form__row { grid-template-columns: 1fr 1fr; }
+}
+
+.form-field {
+  display: grid;
+  align-content: start; /* side-by-side fields keep their inputs aligned, even if one has a hint */
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.form-field__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.form-field__hint {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.7rem 0.9rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-wood-light);
+  border-radius: var(--radius);
+  font-size: 1rem; /* 16px+ keeps iOS from zooming in on focus */
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.input:hover {
+  border-color: var(--color-wood);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-green);
+  box-shadow: 0 0 0 3px rgba(47, 74, 58, 0.18);
+}
+
+.input--textarea {
+  min-height: 160px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--color-error);
+  background: #fdf7f5;
+}
+
+.input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(163, 57, 43, 0.18);
+}
+
+.field-error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.field-error:empty {
+  display: none;
+}
+
+.form__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.form__note {
+  flex: 1 1 260px;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+/* While a form is sending, its disabled submit button shows a "busy" cursor */
+.form[aria-busy="true"] .btn:disabled {
+  cursor: progress;
+}
+
+/* ---------- Notices (error / success boxes) ---------- */
+
+.notice {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid;
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+}
+
+.notice[hidden] {
+  display: none;
+}
+
+.notice p:last-child,
+.notice ul:last-child {
+  margin-bottom: 0;
+}
+
+.notice__title {
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+}
+
+.notice ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.notice--error {
+  background: #fbf1ee;
+  border-color: var(--color-error);
+  color: #6f2419;
+}
+
+.notice--error a {
+  color: inherit;
+}
+
+.notice--success {
+  background: var(--color-green-tint);
+  border-color: var(--color-green);
+  color: var(--color-ink);
+}
+
+.notice--info {
+  background: var(--color-surface);
+  border-color: var(--color-wood);
+  color: var(--color-ink);
+}
+
+/* ---------- Checkbox with label ---------- */
+
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.checkbox input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--color-green);
+}
+
+.checkbox input[aria-invalid="true"] {
+  outline: 2px solid var(--color-error);
+  outline-offset: 2px;
+}
+
+/* ---------- Data tables (profile, admin) ---------- */
+
+.data-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.data-table thead th {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.data-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-bg);
+}
+
+.data-table__actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.data-table__actions .btn + .btn {
+  margin-left: var(--space-2);
+}
+
+/* ---------- Status and role labels ---------- */
+
+.status,
+.role {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status--new { background: #fdf3d8; color: #6b4f00; }
+.status--in_progress { background: #e3ecf5; color: #24456b; }
+.status--answered { background: var(--color-green-tint); color: var(--color-green-dark); }
+.status--closed { background: var(--color-sand); color: var(--color-muted); }
+
+.role--admin { background: var(--color-green); color: #fff; }
+.role--customer { background: var(--color-sand); color: var(--color-wood-dark); }
 
 /* ---------- Call-to-action band ---------- */
 

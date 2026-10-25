@@ -1,0 +1,88 @@
+<!-- Register view (static, Milestone 1). Accounts are created by the backend later. Handled by js/views/auth.js -->
+
+<section class="section">
+  <div class="container auth-layout">
+    <div class="auth-layout__media media">
+      <img src="assets/images/hero.jfif" alt="" loading="eager" data-placeholder>
+      <div class="auth-layout__caption">
+        <p class="eyebrow">A-Frame Living</p>
+        <p>One account for your inquiries, offers and project updates.</p>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <p class="eyebrow">Create an account</p>
+      <h1 class="auth-card__title">Register</h1>
+      <p class="text-muted">All fields are required unless marked optional.</p>
+
+      <form class="form" data-register-form novalidate aria-label="Register">
+        <div class="notice notice--error" data-form-summary role="alert" hidden></div>
+
+        <div class="form__row">
+          <div class="form-field">
+            <label class="form-field__label" for="register-first-name">First name</label>
+            <input class="input" id="register-first-name" name="firstName" type="text" autocomplete="given-name"
+              maxlength="60" required aria-describedby="register-first-name-error">
+            <p class="field-error" id="register-first-name-error"></p>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="register-last-name">Last name</label>
+            <input class="input" id="register-last-name" name="lastName" type="text" autocomplete="family-name"
+              maxlength="60" required aria-describedby="register-last-name-error">
+            <p class="field-error" id="register-last-name-error"></p>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-field__label" for="register-email">Email</label>
+          <input class="input" id="register-email" name="email" type="email" autocomplete="email" inputmode="email"
+            maxlength="150" required aria-describedby="register-email-error">
+          <p class="field-error" id="register-email-error"></p>
+        </div>
+
+        <div class="form-field">
+          <label class="form-field__label" for="register-phone">Phone <span class="text-muted">(optional)</span></label>
+          <input class="input" id="register-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel"
+            maxlength="20" aria-describedby="register-phone-error">
+          <p class="field-error" id="register-phone-error"></p>
+        </div>
+
+        <div class="form__row">
+          <div class="form-field">
+            <label class="form-field__label" for="register-password">Password</label>
+            <input class="input" id="register-password" name="password" type="password" autocomplete="new-password"
+              required aria-describedby="register-password-hint register-password-error">
+            <p class="form-field__hint" id="register-password-hint">At least 8 characters, including a number.</p>
+            <p class="field-error" id="register-password-error"></p>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="register-password-confirm">Repeat password</label>
+            <input class="input" id="register-password-confirm" name="passwordConfirm" type="password"
+              autocomplete="new-password" required aria-describedby="register-password-confirm-error">
+            <p class="field-error" id="register-password-confirm-error"></p>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="checkbox" for="register-terms">
+            <input id="register-terms" name="terms" type="checkbox" required aria-describedby="register-terms-error">
+            <span>I agree that A-Frame Living may store my details to answer my inquiries.</span>
+          </label>
+          <p class="field-error" id="register-terms-error"></p>
+        </div>
+
+        <button class="btn btn--primary auth-card__submit" type="submit">Create account</button>
+      </form>
+
+      <div class="notice notice--success" data-auth-result tabindex="-1" hidden>
+        <p class="notice__title">Thanks, <span data-result-name></span>! Demo only – no account was created.</p>
+        <p>Registration will save accounts once the backend is connected in a later phase.</p>
+        <p class="btn-row">
+          <a class="btn btn--outline btn--sm" href="#/profile">Preview the customer profile</a>
+        </p>
+      </div>
+
+      <p class="auth-card__switch">Already have an account? <a href="#/login">Log in</a></p>
+    </div>
+  </div>
+</section>
