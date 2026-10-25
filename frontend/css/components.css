@@ -369,6 +369,10 @@
   .card-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+@media (min-width: 960px) {
+  .card-grid--3 { grid-template-columns: repeat(3, 1fr); }
+}
+
 @media (min-width: 1100px) {
   .card-grid--4 { grid-template-columns: repeat(4, 1fr); }
 }
@@ -423,6 +427,7 @@
 
 .house-card__footer .btn {
   width: 100%;
+  margin-top: var(--space-5);
 }
 
 /* ---------- Prices ---------- */
@@ -450,6 +455,267 @@
   font-size: 1.6rem;
   font-weight: 600;
   line-height: 1.2;
+}
+
+/* ---------- Feature chips ---------- */
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--color-wood-light);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-wood-dark);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.feature-note {
+  margin-bottom: var(--space-4);
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+/* ---------- Filters (radio / checkbox chips) ---------- */
+
+.filters {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 960px) {
+  .filters {
+    grid-template-columns: auto 1fr;
+    column-gap: var(--space-7);
+  }
+
+  .filters__footer {
+    grid-column: 1 / -1;
+  }
+}
+
+.filters__group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.filters__legend {
+  margin-bottom: var(--space-3);
+  padding: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-wood-dark);
+}
+
+.chip-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip-option {
+  position: relative;
+  cursor: pointer;
+}
+
+/* The real input is visually hidden but still focusable and clickable via its label */
+.chip-option input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.chip-option span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-bg);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.chip-option:hover span {
+  border-color: var(--color-green);
+}
+
+.chip-option input:checked + span {
+  background: var(--color-green);
+  border-color: var(--color-green);
+  color: #fff;
+}
+
+.chip-option input:focus-visible + span {
+  outline: 2px solid var(--color-green);
+  outline-offset: 2px;
+}
+
+.filters__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-line);
+}
+
+.filters__count {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  padding: var(--space-7) var(--space-5);
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-wood-light);
+  border-radius: var(--radius-lg);
+}
+
+.empty-state h2 {
+  font-size: 1.8rem;
+}
+
+/* ---------- Comparison table ---------- */
+
+.table-scroll {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+}
+
+.compare-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.compare-table th,
+.compare-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.compare-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.compare-table thead th {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.compare-table tbody th {
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+/* Keep the row labels visible while the table scrolls sideways */
+.compare-table tr > :first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 150px;
+  background: var(--color-surface);
+}
+
+.compare-table .tick {
+  color: var(--color-green);
+  font-weight: 700;
+}
+
+.compare-table .dash {
+  color: var(--color-wood-light);
+}
+
+.compare-table .todo {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+}
+
+.compare-legend {
+  margin: var(--space-3) 0 var(--space-4);
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+/* ---------- Package cards (ROH BAU / Turnkey) ---------- */
+
+.package-cards {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .package-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.package-card {
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-top: 3px solid var(--color-green);
+  border-radius: var(--radius-lg);
+}
+
+.package-card__name {
+  margin-bottom: var(--space-1);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-wood-dark);
+}
+
+.package-card__price {
+  margin-bottom: var(--space-3);
+  font-family: var(--font-serif);
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.package-card__text {
+  margin: var(--space-2) 0 0;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+.packages-heading {
+  margin: var(--space-7) 0 var(--space-4);
 }
 
 /* ---------- Call-to-action band ---------- */

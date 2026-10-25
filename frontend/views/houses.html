@@ -1,0 +1,62 @@
+<!-- Catalogue view. Filters, cards and the comparison table are filled in by js/views/catalogue.js -->
+
+<section class="section section--tight-bottom">
+  <div class="container">
+    <div class="section__header">
+      <p class="eyebrow">The collection</p>
+      <h1>Our A-frame models</h1>
+      <p class="lead">
+        Four models, each with a living room, a kitchen and a gallery as the second floor.
+        Filter by bedrooms or features, or compare them side by side below.
+      </p>
+    </div>
+
+    <form class="filters" data-filters aria-label="Filter models">
+      <fieldset class="filters__group">
+        <legend class="filters__legend">Bedrooms</legend>
+        <div class="chip-options" data-bedroom-options></div>
+      </fieldset>
+
+      <fieldset class="filters__group">
+        <legend class="filters__legend">Features</legend>
+        <div class="chip-options" data-feature-options></div>
+      </fieldset>
+
+      <div class="filters__footer">
+        <p class="filters__count" data-result-count aria-live="polite"></p>
+        <button class="btn btn--ghost btn--sm" type="reset" data-clear-filters>Clear filters</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section class="section section--tight-top">
+  <div class="container">
+    <div class="card-grid card-grid--4" data-house-grid></div>
+
+    <div class="empty-state" data-empty-state hidden>
+      <h2>No model matches these filters</h2>
+      <p>Try fewer features or a different number of bedrooms.</p>
+      <button class="btn btn--outline" type="button" data-clear-filters>Clear filters</button>
+    </div>
+  </div>
+</section>
+
+<section class="section section--sand anchor-target" id="compare">
+  <div class="container">
+    <div class="section__header">
+      <p class="eyebrow">Compare</p>
+      <h2>The four models side by side</h2>
+      <p class="lead">Prices are shown for the ROH BAU and the turnkey package.</p>
+    </div>
+
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Comparison table (scrolls sideways on small screens)">
+      <table class="compare-table" data-compare-table></table>
+    </div>
+
+    <p class="compare-legend">✓ listed for this model · — not listed</p>
+
+    <h3 class="packages-heading">What the packages include</h3>
+    <div data-packages></div>
+  </div>
+</section>

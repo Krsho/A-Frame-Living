@@ -6,9 +6,13 @@
 import { startRouter } from './router.js';
 import { handleImageError } from './components.js';
 import { initHome } from './views/home.js';
+import { initCatalogue } from './views/catalogue.js';
+import { initHouseDetail } from './views/house-detail.js';
 
 const routes = [
   { path: '/', view: 'home', init: initHome },
+  { path: '/houses', view: 'houses', title: 'Models', init: initCatalogue },
+  { path: '/houses/:slug', view: 'house-detail', title: 'Model', init: initHouseDetail },
 ];
 
 const notFound = { view: 'not-found', title: 'Page not found' };

@@ -155,6 +155,19 @@ a:hover {
   background: var(--color-sand);
 }
 
+.section--tight-top {
+  padding-top: 0;
+}
+
+.section--tight-bottom {
+  padding-bottom: var(--space-6);
+}
+
+/* Sections that links scroll to: leave room for the sticky header */
+.anchor-target {
+  scroll-margin-top: var(--header-height);
+}
+
 .section__header {
   max-width: 680px;
   margin-bottom: var(--space-7);

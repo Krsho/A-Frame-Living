@@ -7,6 +7,8 @@
  * comes from the API, it cannot inject HTML into the page.
  */
 
+import { packages } from './data/houses.js';
+
 const priceFormatter = new Intl.NumberFormat('en-IE', {
   style: 'currency',
   currency: 'EUR',
@@ -24,6 +26,18 @@ export function escapeHtml(value) {
 
 export function formatPrice(amount) {
   return priceFormatter.format(amount);
+}
+
+const metreFormatter = new Intl.NumberFormat('en-IE', { maximumFractionDigits: 1 });
+
+/** 5.8 -> "5.8 m" */
+export function formatMetres(value) {
+  return `${metreFormatter.format(value)} m`;
+}
+
+/** [2.5, 4] -> "2.5 × 4 m" */
+export function formatSize([width, length]) {
+  return `${metreFormatter.format(width)} × ${metreFormatter.format(length)} m`;
 }
 
 export function pluralize(count, word) {
@@ -72,33 +86,56 @@ export function specLine(house) {
   return `${house.area} m² · ${pluralize(house.bedrooms, 'bedroom')} · ${pluralize(house.bathrooms, 'bathroom')}`;
 }
 
+/** Chips for the model's confirmed extra features (or the rooms all models share). */
+export function featureChips(house) {
+  if (house.features.length === 0) {
+    return `<p class="feature-note">${escapeHtml(house.rooms.join(' · '))}</p>`;
+  }
+  const chips = house.features.map((feature) => `<li class="chip">${escapeHtml(feature)}</li>`).join('');
+  return `<ul class="chip-list" aria-label="Features">${chips}</ul>`;
+}
+
 export function priceBlock(house) {
-  return `
-    <dl class="prices">
+  const items = packages
+    .map((pkg) => `
       <div>
-        <dt>ROH BAU</dt>
-        <dd>${formatPrice(house.prices.rohBau)}</dd>
-      </div>
-      <div>
-        <dt>Turnkey</dt>
-        <dd>${formatPrice(house.prices.turnkey)}</dd>
-      </div>
-    </dl>`;
+        <dt>${escapeHtml(pkg.name)}</dt>
+        <dd>${formatPrice(house.prices[pkg.key])}</dd>
+      </div>`)
+    .join('');
+  return `<dl class="prices">${items}</dl>`;
+}
+
+/**
+ * The two packages with their descriptions. When a house is given,
+ * each card also shows that model's price for the package.
+ */
+export function packageCards(house = null) {
+  const cards = packages
+    .map((pkg) => `
+      <li class="package-card">
+        <h3 class="package-card__name">${escapeHtml(pkg.name)}</h3>
+        ${house ? `<p class="package-card__price">${formatPrice(house.prices[pkg.key])}</p>` : ''}
+        <p class="package-card__text">${escapeHtml(pkg.description)}</p>
+      </li>`)
+    .join('');
+  return `<ul class="package-cards">${cards}</ul>`;
 }
 
 export function houseCard(house) {
   const detailUrl = `#/houses/${encodeURIComponent(house.slug)}`;
   return `
     <article class="house-card">
-      <a class="house-card__media media media--4x3" href="${detailUrl}" tabindex="-1" aria-hidden="true">
-        ${image({ src: house.images[0], alt: `${house.name} A-frame house` })}
+      <a class="house-card__media media media--3x2" href="${detailUrl}" tabindex="-1" aria-hidden="true">
+        ${image(house.images[0])}
       </a>
       <div class="house-card__body">
         <p class="eyebrow">${escapeHtml(specLine(house))}</p>
         <h3 class="house-card__title"><a href="${detailUrl}">${escapeHtml(house.name)}</a></h3>
         <p class="house-card__summary">${escapeHtml(house.summary)}</p>
-        ${priceBlock(house)}
+        ${featureChips(house)}
         <div class="house-card__footer">
+          ${priceBlock(house)}
           <a class="btn btn--outline" href="${detailUrl}">
             View details<span class="visually-hidden"> of the ${escapeHtml(house.name)} model</span>
           </a>

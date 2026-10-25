@@ -100,7 +100,14 @@ export function startRouter({ outlet, routes, notFound, siteName, onNavigate }) 
     document.title = title ? `${title} | ${siteName}` : siteName;
     onNavigate?.({ path, segments });
 
-    window.scrollTo(0, 0);
+    // "?section=compare" scrolls to the element with id="compare"; otherwise start at the top.
+    const section = query.get('section');
+    const target = section ? document.getElementById(section) : null;
+    if (target) {
+      target.scrollIntoView();
+    } else {
+      window.scrollTo(0, 0);
+    }
     // Move keyboard/screen-reader focus to the new page heading (not on first load).
     if (!isFirstRender) {
       const heading = outlet.querySelector('h1');

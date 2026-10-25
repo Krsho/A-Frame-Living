@@ -1,28 +1,25 @@
 /*
  * Completed project locations (provided by the project owner).
  *
- * `model` is the slug of the model built there, but only where the
- * owner confirmed it. Most of the other locations are Norway models,
- * but which ones exactly is not confirmed yet, so they are `null` and
- * the views show "TODO: confirm model".
+ * `model` is the slug of the model built there (see js/data/houses.js).
  */
 
 const country = 'Bosnia and Herzegovina';
 
 export const locations = [
-  { city: 'Velika Kladuša', country, model: null },
-  { city: 'Bihać', country, model: null },
-  { city: 'Banja Luka', country, model: null },
-  { city: 'Šipovo', country, model: null },
-  { city: 'Kupres', country, model: null },
-  { city: 'Blidinje', country, model: null },
+  { city: 'Velika Kladuša', country, model: 'norway' },
+  { city: 'Bihać', country, model: 'norway' },
+  { city: 'Banja Luka', country, model: 'norway' },
+  { city: 'Šipovo', country, model: 'norway' },
+  { city: 'Kupres', country, model: 'norway' },
+  { city: 'Blidinje', country, model: 'norway' },
   { city: 'Rostovo', country, model: 'scandinavia' },
   { city: 'Sarajevo', country, model: 'continental' },
-  { city: 'Jahorina', country, model: null },
-  { city: 'Konjic', country, model: null },
-  { city: 'Ivanica', country, model: null },
-  { city: 'Brčko', country, model: null },
-  { city: 'Visoko', country, model: null },
+  { city: 'Jahorina', country, model: 'norway' },
+  { city: 'Konjic', country, model: 'norway' },
+  { city: 'Ivanica', country, model: 'norway' },
+  { city: 'Brčko', country, model: 'norway' },
+  { city: 'Visoko', country, model: 'norway' },
   { city: 'Bjelašnica', country, model: 'atlantic' },
 ];
 
