@@ -1,0 +1,50 @@
+<!-- Log in view (static, Milestone 1). Real login with JWT comes with the backend. Handled by js/views/auth.js -->
+
+<section class="section">
+  <div class="container auth-layout">
+    <div class="auth-layout__media media">
+      <img src="assets/images/about.jfif" alt="" loading="eager" data-placeholder>
+      <div class="auth-layout__caption">
+        <p class="eyebrow">A-Frame Living</p>
+        <p>Follow your inquiries and your future A-frame in one place.</p>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <p class="eyebrow">Welcome back</p>
+      <h1 class="auth-card__title">Log in</h1>
+      <p class="text-muted">Log in to see your inquiries and saved details.</p>
+
+      <form class="form" data-login-form novalidate aria-label="Log in">
+        <div class="notice notice--error" data-form-summary role="alert" hidden></div>
+
+        <div class="form-field">
+          <label class="form-field__label" for="login-email">Email</label>
+          <input class="input" id="login-email" name="email" type="email" autocomplete="email" inputmode="email"
+            required aria-describedby="login-email-error">
+          <p class="field-error" id="login-email-error"></p>
+        </div>
+
+        <div class="form-field">
+          <label class="form-field__label" for="login-password">Password</label>
+          <input class="input" id="login-password" name="password" type="password" autocomplete="current-password"
+            required aria-describedby="login-password-error">
+          <p class="field-error" id="login-password-error"></p>
+        </div>
+
+        <button class="btn btn--primary auth-card__submit" type="submit">Log in</button>
+      </form>
+
+      <div class="notice notice--success" data-auth-result tabindex="-1" hidden>
+        <p class="notice__title">Demo only – you are not logged in.</p>
+        <p>Logging in with a real account (JWT) comes with the backend in a later phase. Until then you can preview both roles:</p>
+        <p class="btn-row">
+          <a class="btn btn--outline btn--sm" href="#/profile">Customer profile</a>
+          <a class="btn btn--outline btn--sm" href="#/admin">Admin dashboard</a>
+        </p>
+      </div>
+
+      <p class="auth-card__switch">New here? <a href="#/register">Create an account</a></p>
+    </div>
+  </div>
+</section>

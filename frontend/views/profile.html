@@ -1,0 +1,59 @@
+<!-- User profile view (static preview, Milestone 1). Example data from js/data/demo.js; filled in by js/views/profile.js -->
+
+<section class="section section--tight-bottom">
+  <div class="container">
+    <div class="notice notice--info preview-banner">
+      <p class="notice__title">Example view</p>
+      <p>This page shows how a logged-in customer will see their account. The data is an example – real accounts arrive with the backend.</p>
+    </div>
+
+    <div class="section__header profile-header">
+      <p class="eyebrow">My account</p>
+      <h1>Hello, <span data-profile-first-name></span></h1>
+      <p class="lead">Your details and the inquiries you have sent to A-Frame Living.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight-top">
+  <div class="container profile-layout">
+    <form class="profile-card form" data-profile-form aria-labelledby="profile-details-title">
+      <h2 class="profile-card__title" id="profile-details-title">Account details</h2>
+
+      <div class="form__row">
+        <div class="form-field">
+          <label class="form-field__label" for="profile-first-name">First name</label>
+          <input class="input" id="profile-first-name" name="firstName" type="text" autocomplete="given-name">
+        </div>
+        <div class="form-field">
+          <label class="form-field__label" for="profile-last-name">Last name</label>
+          <input class="input" id="profile-last-name" name="lastName" type="text" autocomplete="family-name">
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="profile-email">Email</label>
+        <input class="input" id="profile-email" name="email" type="email" autocomplete="email">
+      </div>
+      <div class="form-field">
+        <label class="form-field__label" for="profile-phone">Phone <span class="text-muted">(optional)</span></label>
+        <input class="input" id="profile-phone" name="phone" type="tel" autocomplete="tel">
+      </div>
+
+      <div class="form__footer">
+        <button class="btn btn--primary" type="submit" disabled aria-describedby="profile-save-note">Save changes</button>
+        <p class="form__note" id="profile-save-note">Saving is available once the backend is connected.</p>
+      </div>
+    </form>
+
+    <div class="profile-inquiries">
+      <div class="profile-inquiries__header">
+        <h2 class="profile-card__title">My inquiries</h2>
+        <a class="btn btn--outline btn--sm" href="#/contact">New inquiry</a>
+      </div>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="My inquiries">
+        <table class="data-table" data-profile-inquiries></table>
+      </div>
+      <p class="profile-inquiries__more">Looking for another model? <a class="text-link" href="#/houses">Browse the models &rarr;</a></p>
+    </div>
+  </div>
+</section>

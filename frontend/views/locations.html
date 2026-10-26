@@ -1,0 +1,64 @@
+<!-- Locations view. Stats, filter and cards are filled in by js/views/locations.js -->
+
+<section class="section section--tight-bottom">
+  <div class="container">
+    <div class="section__header">
+      <p class="eyebrow">Completed projects</p>
+      <h1>Where we have built</h1>
+      <p class="lead">
+        From mountain plateaus to river valleys and town outskirts – our A-frames stand across
+        Bosnia and Herzegovina. Filter by model to see where each one has been built.
+      </p>
+    </div>
+
+    <ul class="stats stats--flush">
+      <li><strong data-stat="locations"></strong><span>locations</span></li>
+      <li><strong data-stat="models"></strong><span>models built</span></li>
+      <li><strong data-stat="top-model"></strong><span>most built</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Planned external API feature (backend phase): an interactive OpenStreetMap map with a pin per project.
+     Coordinates come from OpenStreetMap Nominatim via our backend (see docs/database-plan.md). -->
+<section class="section section--tight-top">
+  <div class="container">
+    <div class="map-placeholder" data-map-placeholder role="note" aria-labelledby="map-placeholder-title">
+      <div class="map-placeholder__art" aria-hidden="true">
+        <span class="map-placeholder__pin"></span>
+        <span class="map-placeholder__pin"></span>
+        <span class="map-placeholder__pin"></span>
+        <span class="map-placeholder__pin"></span>
+        <span class="map-placeholder__pin"></span>
+      </div>
+      <div class="map-placeholder__text">
+        <p class="eyebrow">Coming soon</p>
+        <h2 class="map-placeholder__title" id="map-placeholder-title">Map of our completed projects</h2>
+        <p>An interactive map with a pin for every project will appear here. Map data from OpenStreetMap;
+          coordinates looked up with the Nominatim service. Until then, use the “Map” link on each card.</p>
+      </div>
+    </div>
+
+    <form class="filters filters--inline" data-location-filter aria-label="Filter locations by model">
+      <fieldset class="filters__group">
+        <legend class="filters__legend">Model</legend>
+        <div class="chip-options" data-model-options></div>
+      </fieldset>
+      <p class="filters__count" data-location-count aria-live="polite"></p>
+    </form>
+
+    <ul class="location-grid" data-location-grid></ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h2>Planning to build near you?</h2>
+        <p>Tell us where your plot is and which model you are considering.</p>
+      </div>
+      <a class="btn btn--light" href="#/contact">Send an inquiry</a>
+    </div>
+  </div>
+</section>

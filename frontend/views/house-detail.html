@@ -1,0 +1,70 @@
+<!-- House detail view (one template for all four models). Filled in by js/views/house-detail.js -->
+
+<section class="section section--tight-bottom">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="#/houses">Models</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page" data-field="name"></span>
+    </nav>
+
+    <div class="detail-hero">
+      <div class="detail-hero__media media media--3x2" data-main-image></div>
+
+      <div class="detail-hero__info">
+        <p class="eyebrow" data-field="spec-line"></p>
+        <h1 class="detail-hero__title" data-field="name"></h1>
+        <p class="lead" data-field="summary"></p>
+        <div data-features></div>
+        <div data-prices></div>
+        <div class="btn-row detail-hero__actions">
+          <a class="btn btn--primary" data-inquire-link href="#/contact">Inquire about this model</a>
+          <a class="btn btn--outline" href="#/houses?section=compare">Compare models</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container detail-grid">
+    <div>
+      <h2 class="detail-heading">Specifications</h2>
+      <dl class="spec-list" data-spec-list></dl>
+    </div>
+
+    <div>
+      <h2 class="detail-heading">Packages</h2>
+      <div data-packages></div>
+
+      <h2 class="detail-heading">Completed locations</h2>
+      <div data-locations></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight-top" data-gallery-section>
+  <div class="container">
+    <div class="section__header section__header--split">
+      <div>
+        <p class="eyebrow">Gallery</p>
+        <h2>Inside and out</h2>
+      </div>
+      <p class="text-muted"><span data-photo-count></span> · click a photo to enlarge</p>
+    </div>
+    <ul class="gallery" data-gallery></ul>
+  </div>
+</section>
+
+<section class="section section--sand">
+  <div class="container">
+    <div class="section__header section__header--split">
+      <div>
+        <p class="eyebrow">Keep exploring</p>
+        <h2>Other models</h2>
+      </div>
+      <a class="text-link" href="#/houses">All models &rarr;</a>
+    </div>
+    <div class="card-grid card-grid--3" data-other-houses></div>
+  </div>
+</section>
