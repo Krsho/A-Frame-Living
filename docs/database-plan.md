@@ -1,6 +1,6 @@
-# Database Plan (Draft)
+# Database Design
 
-> **Status:** Draft for Milestone 1 (planning only). No tables have been created yet. Names and columns may change when the backend is built.
+> **Status:** Implemented in Milestone 2. Planned in Milestone 1; the tables below now exist in [`backend/database/aframe_living.sql`](../backend/database/aframe_living.sql) (schema + sample data). They are accessed only through the DAO classes in `backend/dao/`.
 
 The A-Frame Living database (MySQL, accessed from PHP through PDO) stores the house models and their prices, photos and features, the completed projects and their locations, customer inquiries, and user accounts for the two roles.
 
@@ -143,6 +143,17 @@ GitHub and VS Code's Markdown preview draw this as a diagram. `PK` = primary key
 | `house_models` → `projects` | one-to-many | A model has been built at many places (Norway: 11 projects). A model with projects cannot be deleted (`ON DELETE RESTRICT`); it can be set to `is_active = 0` instead. |
 | `locations` → `projects` | one-to-many | A location can host several projects over time. |
 
+## Implementation Notes (Milestone 2)
+
+- **Database file:** `backend/database/aframe_living.sql` creates the database `aframe_living`, drops and recreates all tables, and inserts sample data. The sample data is the real models, prices, features, 43 photos and 14 projects from the website, plus example users and inquiries.
+- **Connection:** `backend/config/Database.php` opens one PDO connection with the settings from the git-ignored `backend/config/config.php`. The connection:
+  - turns SQL errors into exceptions;
+  - uses real prepared statements;
+  - switches MySQL to **strict mode**. XAMPP's default mode would otherwise silently store an invalid ENUM value such as an unknown inquiry status as an empty string.
+- **DAO layer:** `backend/dao/BaseDao.php` provides `getAll`, `getById`, `add`, `update` (PUT and PATCH) and `delete` with prepared statements. Each table has its own DAO that extends it. The link tables `model_prices` and `model_features` have composite keys, so their DAOs use their own methods (`setPrice`/`deletePrice`, `attach`/`detach`).
+- **Tests:** `php tests/dao/run-dao-tests.php` rebuilds a separate test database from the `.sql` file and checks every DAO and every foreign-key rule.
+- **Not yet known:** completion dates of the projects (`projects.completed_on` is empty in the sample data) and map coordinates (filled in by the Nominatim integration in Milestone 3).
+
 ## Keys and Constraints
 
 - Every table has an `id INT UNSIGNED AUTO_INCREMENT` primary key, except the two link tables. Those use a composite primary key (`model_id, package_id` and `model_id, feature_id`), so the same pair can't be stored twice.
@@ -183,7 +194,7 @@ The application has two roles, plus visitors who are not logged in. Authenticati
 
 ## Where Today's Static Data Will Live
 
-The Milestone 1 frontend still reads from static files. In the backend phase each file is replaced by calls to the REST API:
+The frontend still reads from static files; the same data is now also in the database. In Milestone 4 each file is replaced by calls to the REST API:
 
 | Static file (today) | Table(s) |
 |---|---|
