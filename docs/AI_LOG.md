@@ -261,6 +261,62 @@ This file records how AI tools were used in the A-Frame Living project. Entries 
 - **Result:** all 6 suites passed, 307/307 checks.
 - **My review / changes:** I pasted the official brief, chose OpenStreetMap Nominatim and a Mermaid ERD, and went through the final steps (authors, review notes, `AGENTS.md`) together with the AI before committing.
 
+---
+
+## Milestone 2: Database and DAO Layer
+
+### Summary
+
+**Tool:** Claude Code (model: Claude Opus 5.5) in VS Code, as in Milestone 1. It ran PHP and XAMPP's MySQL (MariaDB 10.4) on my machine to build and test the database.
+
+**What the AI was used for:**
+- writing the MySQL schema from our database plan;
+- generating the sample data from the frontend data files;
+- writing `Database.php`, `BaseDao` and the DAO classes;
+- writing the DAO tests;
+- updating the README, `AGENTS.md` and the database documentation.
+
+**What I did myself:**
+- pasted the full project requirements and set the goal ("finish up to Milestone 2");
+- committed and pushed Milestone 1 (`2df517c`);
+- set up the tools on my machine (PHP 8.4 and XAMPP);
+- the business data in the sample data is mine, from Milestone 1: models, prices, features, photos and the 14 locations.
+
+**Most important prompt (summary):** "Here are the project requirements again. Finish up to Milestone 2 now; do it in iterations or not, with questions or not, just make it OK." Milestone 2 asks for a MySQL database with at least 5 entities, primary and foreign keys and sample data exported to a `.sql` file. It also asks for a DAO layer with a base DAO class and CRUD with prepared statements for at least five entities, and database credentials in an uncommitted config file.
+
+**Cases where the AI was wrong or produced poor code:**
+
+| # | What was wrong | How it was noticed | How it was fixed |
+|---|---|---|---|
+| 1 | The first `BaseDao` allowed sorting by `created_at`/`updated_at` for **every** table, but `packages`, `features`, `locations` and others don't have those columns. It would have caused an SQL error instead of a clear message. | Review of the code right after it was written | Each DAO now declares its own extra sortable columns (`$extraSortColumns`). A test checks that sorting `packages` by `created_at` is rejected |
+| 2 | The AI's first check of the imported data suggested that **Šipovo was missing** from the database. | Bihać and Brčko were found by the same query, so the AI compared the raw bytes: the stored value was correct UTF-8. The "Š" had been mangled on the Windows command line used for the check | No data change needed. The UTF-8 check was moved into the PHP tests, which pass real UTF-8 strings |
+| 3 | The README's import command `mysql -u root < aframe_living.sql` does not work in **PowerShell** (the VS Code terminal), because PowerShell has no `<` input redirection. | While the README was being updated, the AI noticed that the documented command fails in PowerShell | Added a PowerShell version (`cmd /c "C:\xampp\mysql\bin\mysql.exe -u root < backend\database\aframe_living.sql"`) and ran it to confirm it imports the data |
+| 4 | The browser tests (from Milestone 1) became flaky: in full runs the FAQ or gallery page was sometimes not rendered yet, and a suite crashed. The test helper only waited a fixed 1.2 seconds after opening a page. | A full test run failed, although the same suite passed when run alone | The helper now waits until the page has actually rendered (heading present, "Loading…" gone). If a page doesn't render within 10 seconds, it stops with the page state and the failed network requests. The exact reason for the occasional slow render was not found; after the change, three full runs in a row passed (307/307) |
+
+### Entry 8: Database, sample data and DAO layer
+
+- **Date:** 2026-11-01
+- **Tool:** Claude Code (Claude Opus 5.5), VS Code extension
+- **Prompt (summary):** see the summary above.
+- **What the AI did:**
+  - Checked the setup. PHP 8.4 (with `pdo_mysql`) and XAMPP were available, but MySQL was not running, so the AI started XAMPP's MySQL server.
+  - Created the branch `milestone2` from `milestone1` (the Milestone 1 PR was not merged into `main` yet).
+  - Added `backend/config/config.example.php` (committed template) and `backend/config/Database.php`. It reads the git-ignored `config.php` and opens one PDO connection with exceptions, real prepared statements and MySQL strict mode.
+  - Wrote `backend/database/aframe_living.sql`:
+    - 10 tables, with primary keys, foreign keys (CASCADE / RESTRICT / SET NULL as planned), unique keys, ENUMs and a CHECK constraint;
+    - sample data generated from the frontend data files: 4 models, 8 prices, 6 features, 43 photos, 14 locations and projects;
+    - example users with hashed passwords, and example inquiries.
+  - Wrote `backend/dao/BaseDao.php`: `getAll` (with sorting and paging), `getById`, `add`, `update` (PUT and PATCH) and `delete`. All use prepared statements and a column whitelist.
+  - Wrote 10 entity DAOs. The composite-key link tables get their own methods (`setPrice`, `attach`, …).
+  - Wrote `tests/dao/run-dao-tests.php` (82 checks) on a separate test database.
+  - Updated `README.md` (database setup, test accounts, tests), `AGENTS.md` (backend rules, status) and `docs/database-plan.md` (implementation notes).
+- **Checked during the work:** XAMPP's default MySQL mode is not strict. Without the setting in `Database.php`, an invalid inquiry status such as `'deleted'` would be saved silently as an empty string. The AI confirmed this directly in MySQL, and the tests check that invalid values are rejected.
+- **Mistakes / corrections:** see the table above.
+- **Result:**
+  - DAO tests: 82/82 passed.
+  - Browser tests: 307/307 in 6 suites, in three consecutive full runs.
+- **My review / changes:** I gave the AI the full project requirements and the goal for this milestone, and committed and pushed Milestone 1 (`2df517c`) before starting. I set up PHP 8.4 and XAMPP on my machine. Before the defense I will go through the SQL file and the DAO classes myself, so I can explain the path from a DAO method to the SQL query.
+
 <!-- Copy the entry template below for each new AI interaction. -->
 
 <!--

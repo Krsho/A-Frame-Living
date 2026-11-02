@@ -20,12 +20,20 @@ export async function connect(port = DEBUG_PORT) {
   let id = 0;
   const pending = new Map();
   const errors = [];
+  const networkErrors = []; // failed requests and HTTP errors, shown if a page does not render
+  const requestUrls = new Map();
   ws.addEventListener('message', (e) => {
     const msg = JSON.parse(e.data);
     if (msg.id && pending.has(msg.id)) {
       const { resolve, reject } = pending.get(msg.id);
       pending.delete(msg.id);
       msg.error ? reject(new Error(msg.error.message)) : resolve(msg.result);
+    } else if (msg.method === 'Network.requestWillBeSent') {
+      requestUrls.set(msg.params.requestId, msg.params.request.url);
+    } else if (msg.method === 'Network.loadingFailed') {
+      networkErrors.push(`${msg.params.errorText} ${requestUrls.get(msg.params.requestId) ?? ''}`);
+    } else if (msg.method === 'Network.responseReceived' && msg.params.response.status >= 400) {
+      networkErrors.push(`HTTP ${msg.params.response.status} ${msg.params.response.url}`);
     } else if (msg.method === 'Runtime.exceptionThrown') {
       errors.push(msg.params.exceptionDetails.exception?.description ?? msg.params.exceptionDetails.text);
     } else if (msg.method === 'Runtime.consoleAPICalled' && msg.params.type === 'error') {
@@ -49,10 +57,29 @@ export async function connect(port = DEBUG_PORT) {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const viewport = (width, height, mobile = false) =>
     send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile });
+  // Waits until the SPA has rendered a view: page loaded, a heading in <main>,
+  // and the initial "Loading…" text replaced. A fixed sleep was flaky on busy machines.
+  const waitForView = async (timeoutMs = 10000) => {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      const ready = await evaluate(`document.readyState === 'complete'
+        && !!document.querySelector('#app h1')
+        && !document.querySelector('#app').textContent.includes('Loading…')`).catch(() => false);
+      if (ready) return true;
+      await wait(100);
+    }
+    return false;
+  };
   const goto = async (url) => {
     // Go via about:blank so each goto is a real page load (a hash-only change would keep old JS).
     await send('Page.navigate', { url: 'about:blank' }); await wait(150);
-    await send('Page.navigate', { url }); await wait(1200);
+    networkErrors.length = 0;
+    await send('Page.navigate', { url });
+    if (!(await waitForView())) {
+      const state = await evaluate(`({ readyState: document.readyState, main: document.querySelector('#app')?.textContent.trim().slice(0, 80) })`).catch((e) => e.message);
+      throw new Error(`Page did not render: ${url}\n  state: ${JSON.stringify(state)}\n  network: ${networkErrors.slice(0, 5).join(' | ') || 'no failed requests'}\n  console: ${errors.slice(-3).join(' | ') || 'none'}`);
+    }
+    await wait(400); // let images and late scripts settle
   };
   await send('Network.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });
   const screenshot = async (path, fullPage = true) => {

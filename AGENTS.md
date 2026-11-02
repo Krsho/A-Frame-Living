@@ -37,7 +37,7 @@ A-Frame Living is a web application for a company that builds A-frame houses in 
 ## Architecture
 
 - **Single-page application (SPA):** `frontend/index.html` loads once. The hash router (`frontend/js/router.js`) maps URLs like `#/houses/norway` to a route. It loads the HTML fragment from `frontend/views/`, inserts it into `<main>`, and calls the route's `init()` function. There are no full page reloads.
-- **REST API backend (planned):** The backend returns JSON only. It never renders HTML pages for the frontend.
+- **REST API backend (in progress):** The backend returns JSON only. It never renders HTML pages for the frontend.
 - **Strict separation:** Frontend code never touches the database or PHP directly. All communication goes through HTTP requests (`fetch`) to the API, inside `frontend/js/services/`.
 
 ### Frontend
@@ -59,9 +59,9 @@ A-Frame Living is a web application for a company that builds A-frame houses in 
 
 **Adding a page:** create `views/<name>.html` and `js/views/<name>.js` with an `init` function, then register the route in `app.js`. Add a test suite or checks in `tests/e2e/`.
 
-### Backend layers (planned)
+### Backend layers
 
-Requests flow in one direction:
+Built so far: `config/` and `dao/` (Milestone 2). Routes, services and middleware come in Milestones 3–4. Requests flow in one direction:
 
 ```
 HTTP request → middleware → routes → services → dao → MySQL
@@ -72,15 +72,19 @@ HTTP request → middleware → routes → services → dao → MySQL
 | `backend/middleware` | Runs before routes, for example authentication and request checks.             |
 | `backend/routes`     | Defines FlightPHP endpoints. Reads the request, calls a service, returns JSON. No SQL here. |
 | `backend/services`   | Business logic and validation. Calls DAOs. No direct SQL here.                 |
-| `backend/dao`        | Data Access Objects. The **only** place SQL runs, always through PDO.          |
-| `backend/config`     | Configuration. `config.php` is git-ignored; `config.example.php` is the committed template. |
+| `backend/dao`        | Data Access Objects. The **only** place SQL runs, always through PDO. `BaseDao.php` has the reusable CRUD methods; one `<Entity>Dao.php` per table. |
+| `backend/config`     | Configuration. `config.php` is git-ignored; `config.example.php` is the committed template. `Database.php` creates the single PDO connection. |
+| `backend/database`   | `aframe_living.sql`: schema + sample data. Re-import to reset the database.    |
 | `backend/logs`       | Runtime logs. Contents are git-ignored.                                        |
+
+**Adding a table:** add it to `backend/database/aframe_living.sql` and `docs/database-plan.md` (including the ERD). Then create a DAO that extends `BaseDao` and lists its writable columns, and add checks to `tests/dao/run-dao-tests.php`.
 
 ### Tests
 
 | Folder       | Responsibility                                                                 |
 |--------------|--------------------------------------------------------------------------------|
 | `tests/e2e`  | Browser tests (Node + headless Edge/Chrome, no npm packages). Run `node tests/e2e/run-all.mjs` after every change and keep all suites passing; add a suite or checks for new features. See `tests/e2e/README.md`. |
+| `tests/dao`  | Database tests (PHP). `php tests/dao/run-dao-tests.php` rebuilds the separate database `aframe_living_test` from the `.sql` file and tests every DAO. Never point tests at the real `aframe_living` database. |
 
 ## Database
 
@@ -110,6 +114,10 @@ The planned schema (entities, columns, relationships, roles, draft ERD) is in `d
 
 ### PHP / Backend
 - Always use **PDO prepared statements** with bound parameters. Never build SQL by concatenating user input.
+- Column and table names cannot be bound, so they may only come from a DAO's own column list (`BaseDao` rejects unknown columns). Never put request data into SQL as a column name or `ORDER BY` value.
+- Every DAO extends `BaseDao`. Link tables with a composite key (`model_prices`, `model_features`) use their own methods instead of `getById`/`update`/`delete`.
+- `UserDao` never returns `password_hash`, except `getByEmailWithPassword()`, which is for login only.
+- Keep the connection settings in `Database.php`, including MySQL strict mode. Don't open PDO connections anywhere else.
 - Return JSON with appropriate HTTP status codes (200, 201, 400, 401, 404, 500).
 - Validate all input in the service layer.
 - Hash passwords with `password_hash()` and check them with `password_verify()`.
@@ -136,4 +144,10 @@ The planned schema (entities, columns, relationships, roles, draft ERD) is in `d
     - static previews of Log in, Register, Profile and the Admin dashboard;
     - browser tests (6 suites);
     - the database plan with a draft ERD.
-- **Backend:** not started. `backend/` contains only empty folders. There are no database tables and no packages. The external API (OpenStreetMap Nominatim), JWT, middleware, logging and OpenAPI docs come in later milestones.
+- **Milestone 2:**
+  - Built:
+    - the MySQL database (10 tables, primary and foreign keys, sample data) in `backend/database/aframe_living.sql`;
+    - `Database.php` reading the git-ignored `config.php`;
+    - `BaseDao` and a DAO for every table;
+    - DAO tests (`tests/dao/`).
+- **Not built yet:** services, FlightPHP routes, OpenAPI docs, the external API (OpenStreetMap Nominatim) (Milestone 3); JWT, middleware, logging, connecting the frontend to the API (Milestone 4). No Composer packages are installed yet.

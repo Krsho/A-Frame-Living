@@ -1,6 +1,6 @@
 # A-Frame Living
 
-> **Status:** Milestone 1 – static frontend (SPA) and database plan. The PHP/MySQL backend has not been built yet.
+> **Status:** Milestone 2 – MySQL database with sample data and the PHP DAO layer. The REST API (FlightPHP routes and services) follows in Milestone 3; the frontend still uses static data until Milestone 4.
 
 ## About
 
@@ -15,8 +15,8 @@ Model sizes, rooms, features, prices, footprints and completed locations were pr
 | Layer    | Technology                          | Status |
 |----------|-------------------------------------|--------|
 | Frontend | HTML, CSS, vanilla JavaScript (ES modules) | Built |
-| Backend  | PHP with the FlightPHP framework    | Planned |
-| Database | MySQL, accessed through PHP PDO     | Planned |
+| Backend  | PHP 8 with the FlightPHP framework  | DAO layer built; routes and services planned |
+| Database | MySQL (MariaDB), accessed through PHP PDO | Built, with sample data |
 | API      | REST (JSON)                         | Planned |
 
 No frontend frameworks, no build tools and no npm packages.
@@ -71,10 +71,19 @@ A-Frame-Living/
 │   │   └── views/          # One script per page
 │   ├── views/              # One HTML fragment per page
 │   └── assets/images/      # Photos (see assets/images/README.md)
-├── backend/                # Planned FlightPHP API (empty folders so far)
-│   ├── routes/  services/  dao/  middleware/  config/  logs/
+├── backend/
+│   ├── config/
+│   │   ├── config.example.php   # Settings template (committed)
+│   │   ├── config.php           # Your real settings (git-ignored, create it yourself)
+│   │   └── Database.php         # Creates the PDO connection
+│   ├── dao/                     # BaseDao + one DAO per entity (the only place SQL runs)
+│   ├── database/
+│   │   └── aframe_living.sql    # Database schema + sample data
+│   ├── routes/  services/  middleware/   # Milestones 3–4
+│   └── logs/                    # Log files (git-ignored)
 ├── tests/
-│   └── e2e/                # Browser tests (see tests/e2e/README.md)
+│   ├── e2e/                # Browser tests (see tests/e2e/README.md)
+│   └── dao/                # Database/DAO tests (PHP)
 ├── docs/
 │   ├── database-plan.md    # Entities, relationships and draft ERD
 │   └── AI_LOG.md           # Record of AI assistance used in the project
@@ -97,13 +106,21 @@ Choose one:
 
 ## Running the Tests
 
-The frontend has automated browser tests (6 suites). They need Node.js 22+, Python 3 and Microsoft Edge or Google Chrome. There's nothing to install:
+**Frontend (browser tests, 6 suites).** Needs Node.js 22+, Python 3 and Microsoft Edge or Google Chrome; nothing to install:
 
 ```
 node tests/e2e/run-all.mjs
 ```
 
 See [tests/e2e/README.md](tests/e2e/README.md) for what each suite covers and how to save screenshots.
+
+**Database and DAO layer.** Needs PHP 8 with `pdo_mysql`, a running MySQL server and `backend/config/config.php` (see [Database Setup](#database-setup)):
+
+```
+php tests/dao/run-dao-tests.php
+```
+
+The script builds a separate database `aframe_living_test` from the `.sql` file and tests create, read, update and delete for every DAO, plus the foreign-key rules. Your `aframe_living` database is not changed.
 
 ## Editing Content
 
@@ -119,7 +136,7 @@ See [tests/e2e/README.md](tests/e2e/README.md) for what each suite covers and ho
 
 ## Entities and Relationships
 
-The full plan with columns, keys and the draft ERD is in **[docs/database-plan.md](docs/database-plan.md)** (draft, Milestone 1).
+The schema with columns, keys and the ERD is documented in **[docs/database-plan.md](docs/database-plan.md)**. The database itself is created by [backend/database/aframe_living.sql](backend/database/aframe_living.sql).
 
 | Entity (table) | Relationships |
 |---|---|
@@ -139,19 +156,35 @@ The full plan with columns, keys and the draft ERD is in **[docs/database-plan.m
 | Customer | Everything a guest can, plus manage own profile and see own inquiries |
 | Admin | Manage models, packages, features, locations, projects, inquiries and users |
 
-**TODO:** test accounts for each role are created with the backend (authentication with JWT).
+Test accounts (included in the sample data). Logging in through the website works from Milestone 4 (JWT authentication).
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@aframe-living.example` | `Admin123!` |
+| Customer | `ana.kovac@example.com` | `Customer123!` |
+
+The other sample customers (`emir.hadzic@example.com`, `lena.maric@example.com`) use the same password.
 
 ## External API
 
 **OpenStreetMap Nominatim** (geocoding) – *planned for the backend phase.* When an admin saves a location, the backend looks up its coordinates; the **Locations** page will show an interactive map with a pin for every completed project. A placeholder panel on the Locations page already marks where the map will appear. Details and error handling: [docs/database-plan.md](docs/database-plan.md#external-api-openstreetmap-nominatim).
 
-## Configuration
-
-**TODO (backend phase):** copy `backend/config/config.example.php` to `backend/config/config.php` and fill in the database credentials and the JWT secret. `config.php` is git-ignored.
-
 ## Database Setup
 
-**TODO (backend phase):** import the `.sql` file into MySQL.
+You need MySQL or MariaDB (for example from **XAMPP**: start *MySQL* in the XAMPP Control Panel) and PHP 8 with the `pdo_mysql` extension.
+
+1. **Import the database.** This creates the database `aframe_living` with all tables and sample data (importing again resets it):
+   - **phpMyAdmin:** open http://localhost/phpmyadmin, choose *Import*, select `backend/database/aframe_living.sql`, then *Go*.
+   - **Command line:**
+     ```
+     mysql -u root < backend/database/aframe_living.sql
+     ```
+     In **PowerShell** (e.g. the VS Code terminal), `<` does not work; with XAMPP use:
+     ```
+     cmd /c "C:\xampp\mysql\bin\mysql.exe -u root < backend\database\aframe_living.sql"
+     ```
+2. **Create the configuration file.** Copy `backend/config/config.example.php` to `backend/config/config.php` and fill in your database user and password. XAMPP's default is user `root` with an empty password, which the template already uses. `config.php` is git-ignored, so your credentials stay on your computer.
+3. **Check it works:** `php tests/dao/run-dao-tests.php` should end with all checks passed.
 
 ## API Documentation
 
@@ -163,7 +196,7 @@ The full plan with columns, keys and the draft ERD is in **[docs/database-plan.m
 
 ## Milestones
 
-- [ ] **Milestone 1** (in progress)
+- [x] **Milestone 1** – setup, static frontend, ERD
   - [x] Project structure, `.gitignore`, README, AGENTS.md, AI log
   - [x] Frontend SPA: Home, Models, Model details, Locations, How to buy, FAQ, Contact
   - [x] Automated browser tests
@@ -171,7 +204,13 @@ The full plan with columns, keys and the draft ERD is in **[docs/database-plan.m
   - [x] Static User profile and Admin dashboard views
   - [x] Planned place for the external API feature (map on Locations)
   - [x] Database plan and draft ERD
-- [ ] **Later milestones:** FlightPHP REST API with PDO, JWT authentication, CRUD for every entity, external API, middleware, logging, OpenAPI docs, hosting
+- [x] **Milestone 2** – database and DAO layer
+  - [x] MySQL schema with 10 tables, primary and foreign keys (`backend/database/aframe_living.sql`)
+  - [x] Sample data (the real models, prices, photos and the 14 projects; example users and inquiries)
+  - [x] `BaseDao` with reusable CRUD methods and a DAO for every entity, using prepared statements
+  - [x] Database credentials read from the git-ignored `config.php` (`config.example.php` committed)
+  - [x] DAO tests
+- [ ] **Later milestones:** services, FlightPHP routes, OpenAPI, external API (M3); JWT, middleware, logging, connected frontend (M4); frontend MVC, validation, deployment (M5)
 
 ## Authors
 
