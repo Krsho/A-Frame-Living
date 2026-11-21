@@ -36,10 +36,4 @@ class ProjectDao extends BaseDao
             [$modelId]
         );
     }
-
-    /** Projects at one location (a location with projects cannot be deleted). */
-    public function getForLocation(int $locationId): array
-    {
-        return $this->query('SELECT * FROM projects WHERE location_id = ? ORDER BY id', [$locationId]);
-    }
 }

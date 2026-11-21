@@ -25,14 +25,4 @@ return [
         'secret'     => 'replace-with-a-long-random-secret',
         'expires_in' => 3600,      // seconds
     ],
-
-    // External API: OpenStreetMap Nominatim (geocoding of locations, Milestone 3).
-    // Nominatim needs no API key, but its usage policy asks for an app name in the
-    // User-Agent and allows at most 1 request per second.
-    'nominatim' => [
-        'base_url'   => 'https://nominatim.openstreetmap.org',
-        'user_agent' => 'AFrameLiving/1.0 (university project)',
-        'email'      => '',       // optional contact e-mail sent with each request
-        'timeout'    => 5,        // seconds before the request is cancelled
-    ],
 ];

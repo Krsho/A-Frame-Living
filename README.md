@@ -1,6 +1,6 @@
 # A-Frame Living
 
-> **Status:** Milestone 3 – REST API with FlightPHP: a service with business rules for every entity, CRUD routes for every entity, OpenAPI documentation with Swagger, and the external API (OpenStreetMap Nominatim). Login with JWT, middleware and the connection of the frontend to the API follow in Milestone 4; until then the frontend still uses its static data.
+> **Status:** Milestone 2 – MySQL database with sample data and the PHP DAO layer. The REST API (FlightPHP routes and services) follows in Milestone 3; the frontend still uses static data until Milestone 4.
 
 ## About
 
@@ -15,12 +15,11 @@ Model sizes, rooms, features, prices, footprints and completed locations were pr
 | Layer    | Technology                          | Status |
 |----------|-------------------------------------|--------|
 | Frontend | HTML, CSS, vanilla JavaScript (ES modules) | Built |
-| Backend  | PHP 8 with the FlightPHP framework  | DAO layer, services and routes built; JWT and middleware planned (M4) |
+| Backend  | PHP 8 with the FlightPHP framework  | DAO layer built; routes and services planned |
 | Database | MySQL (MariaDB), accessed through PHP PDO | Built, with sample data |
-| API      | REST (JSON), documented with OpenAPI / Swagger | Built |
-| External API | OpenStreetMap Nominatim (geocoding) | Built in the backend; shown on the map in M4 |
+| API      | REST (JSON)                         | Planned |
 
-No frontend frameworks, no build tools and no npm packages. The backend uses two Composer packages: `flightphp/core` and `zircote/swagger-php` (generates the OpenAPI document).
+No frontend frameworks, no build tools and no npm packages.
 
 ## Architecture
 
@@ -29,12 +28,6 @@ No frontend frameworks, no build tools and no npm packages. The backend uses two
 - **Reusable components.** `js/components.js` builds shared pieces (house cards, price blocks, package cards, images with fallbacks). `js/validation.js` handles form validation, and `js/lightbox.js` is the photo viewer.
 - **Ready for the API.** The contact form sends through `js/services/inquiries.js`, which currently only *simulates* the request. In the backend phase this file will call the FlightPHP REST API. The pages themselves will not need to change.
 - **Frontend and backend stay separate.** The frontend will talk to the backend only through HTTP requests (`fetch`) that return JSON.
-- **Backend layers.** Every request goes through `backend/index.php` and flows in one direction:
-  `HTTP request → route → service → DAO → MySQL`, and back as JSON.
-  - **Routes** (`backend/routes/`) read the request, call one service method and send JSON. They contain no SQL and no business rules.
-  - **Services** (`backend/services/`) validate the data (`Validator.php`) and apply the business rules, e.g. a unique e-mail, or "a model with projects cannot be deleted". They are the only layer that calls DAOs.
-  - **DAOs** (`backend/dao/`) are the only place where SQL runs, always with prepared statements.
-  - **Errors** are thrown by services as exceptions with a status code (`backend/exceptions/`). The error handler (`backend/utils/ErrorHandler.php`) turns them into JSON. Unexpected errors become a `500` with a general message, and the details go to `backend/logs/error.log`.
 
 ## Pages and Features
 
@@ -79,29 +72,18 @@ A-Frame-Living/
 │   ├── views/              # One HTML fragment per page
 │   └── assets/images/      # Photos (see assets/images/README.md)
 ├── backend/
-│   ├── index.php                # Entry point of the API: loads classes, registers services and routes
-│   ├── .htaccess                # Apache: sends every request to index.php
-│   ├── composer.json / .lock    # Composer packages (FlightPHP, swagger-php)
-│   ├── vendor/                  # Installed packages (git-ignored, created by composer install)
 │   ├── config/
 │   │   ├── config.example.php   # Settings template (committed)
 │   │   ├── config.php           # Your real settings (git-ignored, create it yourself)
-│   │   ├── AppConfig.php        # Reads config.php
 │   │   └── Database.php         # Creates the PDO connection
-│   ├── routes/                  # One route class per entity: URLs → service calls + OpenAPI docs
-│   ├── services/                # Business logic and validation (Validator.php, GeocodingService.php = external API)
 │   ├── dao/                     # BaseDao + one DAO per entity (the only place SQL runs)
-│   ├── exceptions/              # Errors with an HTTP status code (400, 404, 409, 503)
-│   ├── utils/                   # Logger and ErrorHandler
-│   ├── docs/                    # Swagger page (index.html) and shared OpenAPI definitions
 │   ├── database/
 │   │   └── aframe_living.sql    # Database schema + sample data
-│   ├── middleware/              # Milestone 4 (JWT, roles, request logging)
-│   └── logs/                    # info.log and error.log (git-ignored)
+│   ├── routes/  services/  middleware/   # Milestones 3–4
+│   └── logs/                    # Log files (git-ignored)
 ├── tests/
 │   ├── e2e/                # Browser tests (see tests/e2e/README.md)
-│   ├── dao/                # Database/DAO tests (PHP)
-│   └── api/                # REST API tests (PHP, real HTTP requests)
+│   └── dao/                # Database/DAO tests (PHP)
 ├── docs/
 │   ├── database-plan.md    # Entities, relationships and draft ERD
 │   └── AI_LOG.md           # Record of AI assistance used in the project
@@ -122,24 +104,6 @@ Choose one:
   ```
   and open http://localhost:8000/.
 
-## Running the Backend (REST API) Locally
-
-1. Set up the database and `config.php` first (see [Database Setup](#database-setup)).
-2. **Install the Composer packages** (once, and again whenever `composer.json` changes). You need [Composer](https://getcomposer.org/), and PHP's `openssl`, `curl` and `zip` extensions must be enabled in `php.ini`:
-   ```
-   cd backend
-   composer install
-   ```
-   This creates `backend/vendor/` (git-ignored).
-3. **Start the API** with PHP's built-in server, from the project root:
-   ```
-   php -S localhost:8080 -t backend backend/index.php
-   ```
-   - The API runs at http://localhost:8080, e.g. http://localhost:8080/houses.
-   - The Swagger documentation is at http://localhost:8080/docs/.
-
-   With XAMPP's Apache instead, put the project in `htdocs` (or point an alias to it) and open `.../backend/docs/`. `backend/.htaccess` sends every request to `index.php`.
-
 ## Running the Tests
 
 **Frontend (browser tests, 6 suites).** Needs Node.js 22+, Python 3 and Microsoft Edge or Google Chrome; nothing to install:
@@ -158,20 +122,7 @@ php tests/dao/run-dao-tests.php
 
 The script builds a separate database `aframe_living_test` from the `.sql` file and tests create, read, update and delete for every DAO, plus the foreign-key rules. Your `aframe_living` database is not changed.
 
-**REST API.** Needs the same as the DAO tests, plus `composer install` in `backend/` and PHP's `curl` extension:
-
-```
-php tests/api/run-api-tests.php
-```
-
-The script rebuilds `aframe_living_test` and starts the backend on ports 8091–8094 with PHP's built-in server. It then sends real HTTP requests to every endpoint and checks the status codes, the JSON, the business rules and the log entries.
-- The external API is replaced by a small fake Nominatim (`tests/api/fake-nominatim.php`), so the tests never call OpenStreetMap.
-- A second backend runs with Nominatim "down", to check that the application keeps working.
-- Test logs are written to `tests/api/logs/`, not `backend/logs/`.
-
 ## Editing Content
-
-Until the frontend is connected to the API (Milestone 4), the website still shows the data from these files. The same data is in the database and can already be changed through the API.
 
 | What | Where |
 |---|---|
@@ -196,7 +147,6 @@ The schema with columns, keys and the ERD is documented in **[docs/database-plan
 | `locations` | hosts many `projects`; stores map coordinates from the external API |
 | `projects` | a completed build: one model at one location |
 | `inquiries` | contact-form messages; optionally linked to a user and a model |
-| `faqs` | questions and answers for the FAQ page (added in Milestone 3; no relationships) |
 
 ## Roles and Test Accounts
 
@@ -217,30 +167,13 @@ The other sample customers (`emir.hadzic@example.com`, `lena.maric@example.com`)
 
 ## External API
 
-**OpenStreetMap Nominatim** (geocoding) turns a place name such as "Kupres, Bosnia and Herzegovina" into map coordinates.
-
-- **Feature:** when an admin adds a location or changes its city, the backend looks up its coordinates and saves them. `GET /projects` returns every project with the coordinates of its location. In Milestone 4 the **Locations** page will use them to show a map with a pin per project; a placeholder panel already marks the spot.
-- **Code:** `backend/services/GeocodingService.php` calls Nominatim. `LocationService` uses it when a location is saved.
-- **Endpoints** (documented in Swagger under *External API*):
-  - `GET /geocode?city=&country=`: look up a place; nothing is saved.
-  - `POST /locations/{id}/geocode`: look up and save one location.
-  - `POST /locations/geocode-missing`: look up and save every location without coordinates.
-- **No API key** is needed. The settings (URL, User-Agent, timeout, optional contact e-mail) are in `config.php` under `nominatim`.
-- **When Nominatim fails** (timeout, no connection, HTTP error, invalid answer):
-  - the failure is written to `backend/logs/error.log`;
-  - the client gets `503` with a friendly message;
-  - a location that is being saved is still saved, without coordinates.
-
-  Successful calls are written to `backend/logs/info.log`.
-- Nominatim's usage policy is respected: the requests identify the app in the User-Agent and are sent at most once per second.
-
-The sample locations have no coordinates yet. After importing the database and starting the backend, call `POST /locations/geocode-missing` once in Swagger to fill them in. It takes about 14 seconds, because of the one-request-per-second limit.
+**OpenStreetMap Nominatim** (geocoding) – *planned for the backend phase.* When an admin saves a location, the backend looks up its coordinates; the **Locations** page will show an interactive map with a pin for every completed project. A placeholder panel on the Locations page already marks where the map will appear. Details and error handling: [docs/database-plan.md](docs/database-plan.md#external-api-openstreetmap-nominatim).
 
 ## Database Setup
 
 You need MySQL or MariaDB (for example from **XAMPP**: start *MySQL* in the XAMPP Control Panel) and PHP 8 with the `pdo_mysql` extension.
 
-1. **Import the database.** This creates the database `aframe_living` with all tables and sample data. Importing again resets it, so if you imported it before Milestone 3, import it again to get the new `faqs` table:
+1. **Import the database.** This creates the database `aframe_living` with all tables and sample data (importing again resets it):
    - **phpMyAdmin:** open http://localhost/phpmyadmin, choose *Import*, select `backend/database/aframe_living.sql`, then *Go*.
    - **Command line:**
      ```
@@ -255,23 +188,7 @@ You need MySQL or MariaDB (for example from **XAMPP**: start *MySQL* in the XAMP
 
 ## API Documentation
 
-With the backend running locally: **http://localhost:8080/docs/** (Swagger UI). The raw OpenAPI document is at http://localhost:8080/openapi.json.
-
-The document is generated from the `#[OA\...]` attributes next to each route in `backend/routes/`, so it always matches the code. Every endpoint can be tried out directly on the Swagger page. **TODO:** link to the deployed Swagger page (Milestone 5).
-
-Main endpoints (all JSON):
-
-| Resource | Endpoints |
-|---|---|
-| House models | `GET/POST /houses`, `GET /houses/{id or slug}`, `PUT/PATCH/DELETE /houses/{id}` |
-| Prices | `GET /houses/{id}/prices`, `PUT/DELETE /houses/{id}/prices/{packageId}` |
-| Model features | `GET/POST /houses/{id}/features`, `DELETE /houses/{id}/features/{featureId}` |
-| Photos | `GET/POST /houses/{id}/images`, `GET/PUT/PATCH/DELETE /images/{id}` |
-| Packages, features, locations, projects, inquiries, users, FAQ | `GET/POST /<resource>`, `GET/PUT/PATCH/DELETE /<resource>/{id}` |
-| Extra | `GET /users/{id}/inquiries`, filters `?category=`, `?status=`, `?include_inactive=true` |
-| External API | `GET /geocode`, `POST /locations/{id}/geocode`, `POST /locations/geocode-missing` |
-
-Status codes: `200` OK, `201` created, `400` invalid data (with one message per field), `404` not found, `409` conflict (duplicate value or row still in use), `503` external API unavailable, `500` unexpected error. `401`/`403` follow with login and roles in Milestone 4. Until then **all endpoints are open**.
+**TODO:** link to the Swagger (OpenAPI) documentation. The planned endpoints are listed in [docs/database-plan.md](docs/database-plan.md#draft-rest-endpoints-planning-notes).
 
 ## Deployed Application
 
@@ -293,14 +210,7 @@ Status codes: `200` OK, `201` created, `400` invalid data (with one message per 
   - [x] `BaseDao` with reusable CRUD methods and a DAO for every entity, using prepared statements
   - [x] Database credentials read from the git-ignored `config.php` (`config.example.php` committed)
   - [x] DAO tests
-- [x] **Milestone 3** – services, routes, OpenAPI, external API
-  - [x] A service with validation and business rules for every entity (`backend/services/`)
-  - [x] FlightPHP routes for all CRUD operations of all entities, JSON with correct status codes
-  - [x] OpenAPI documentation of every endpoint, Swagger page at `/docs/`
-  - [x] External API: Nominatim service + endpoints, with timeout, error log and friendly `503`
-  - [x] New `faqs` table, so the FAQ is no longer only hard-coded in the frontend
-  - [x] API tests (`tests/api/`)
-- [ ] **Later milestones:** JWT, middleware, logging, connected frontend (M4); frontend MVC, validation, deployment (M5)
+- [ ] **Later milestones:** services, FlightPHP routes, OpenAPI, external API (M3); JWT, middleware, logging, connected frontend (M4); frontend MVC, validation, deployment (M5)
 
 ## Authors
 

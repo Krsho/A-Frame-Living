@@ -1,13 +1,8 @@
 # Database Design
 
-> **Status:** Implemented in Milestone 2. Planned in Milestone 1; the tables below now exist in [`backend/database/aframe_living.sql`](../backend/database/aframe_living.sql) (schema + sample data). They are accessed only through the DAO classes in `backend/dao/`. Milestone 3 added the `faqs` table and the REST API on top (services and routes).
+> **Status:** Implemented in Milestone 2. Planned in Milestone 1; the tables below now exist in [`backend/database/aframe_living.sql`](../backend/database/aframe_living.sql) (schema + sample data). They are accessed only through the DAO classes in `backend/dao/`.
 
-The A-Frame Living database (MySQL, accessed from PHP through PDO) stores:
-- the house models and their prices, photos and features;
-- the completed projects and their locations;
-- customer inquiries;
-- user accounts for the two roles;
-- the FAQ.
+The A-Frame Living database (MySQL, accessed from PHP through PDO) stores the house models and their prices, photos and features, the completed projects and their locations, customer inquiries, and user accounts for the two roles.
 
 ## Entities at a Glance
 
@@ -23,9 +18,8 @@ The A-Frame Living database (MySQL, accessed from PHP through PDO) stores:
 | 8 | `locations` | Places where houses have been built, with map coordinates |
 | 9 | `projects` | Completed builds: which model was built at which location |
 | 10 | `inquiries` | Messages sent through the contact form |
-| 11 | `faqs` | Questions and answers for the FAQ page (added in Milestone 3) |
 
-The **main entities** with their own CRUD screens are `users`, `house_models`, `packages`, `features`, `locations`, `projects`, `inquiries` and `faqs`. `model_prices`, `model_features` and `model_images` belong to a house model and are managed on its admin screen.
+The **main entities** with their own CRUD screens are `users`, `house_models`, `packages`, `features`, `locations`, `projects` and `inquiries`. `model_prices`, `model_features` and `model_images` belong to a house model and are managed on its admin screen.
 
 ## Entity-Relationship Diagram
 
@@ -133,19 +127,9 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
-
-    FAQS {
-        int id PK
-        enum category "models | packages | customization | locations | process"
-        varchar question
-        text answer "plain text"
-        varchar link_label "nullable"
-        varchar link_url "nullable, e.g. #/contact"
-        int sort_order "order inside the category"
-    }
 ```
 
-GitHub and VS Code's Markdown preview draw this as a diagram. `PK` = primary key, `FK` = foreign key, `UK` = unique. `faqs` has no relationships: it is standalone site content.
+GitHub and VS Code's Markdown preview draw this as a diagram. `PK` = primary key, `FK` = foreign key, `UK` = unique.
 
 ## Relationships
 
@@ -170,24 +154,6 @@ GitHub and VS Code's Markdown preview draw this as a diagram. `PK` = primary key
 - **Tests:** `php tests/dao/run-dao-tests.php` rebuilds a separate test database from the `.sql` file and checks every DAO and every foreign-key rule.
 - **Not yet known:** completion dates of the projects (`projects.completed_on` is empty in the sample data) and map coordinates (filled in by the Nominatim integration in Milestone 3).
 
-## Implementation Notes (Milestone 3)
-
-- **New table `faqs`.** The FAQ texts from the Milestone 1 page are now sample data in the database (written for the assignment). Answers that listed prices, sizes or project counts now link to the page that shows them, so those numbers are stored only once.
-- **New DAO methods for the services:**
-  - `FaqDao` (`getAllOrdered`, `getByCategory`);
-  - `FeatureDao::getByName`;
-  - `ModelPriceDao::getForPackage`;
-  - `ProjectDao::getForLocation`.
-- **Business rules in the services** (`backend/services/`). They are checked before the DAO is called, so the client gets a clear message instead of a database error:
-  - unique values (e-mail, slug, package code, feature name, city + country) → `409`;
-  - referenced rows must exist (e.g. `projects.model_id`) → `400`;
-  - a model or location that still has projects, or a package that still has prices, cannot be deleted → `409`;
-  - the last admin cannot be deleted or made a customer → `409`;
-  - a new inquiry always starts as `new`;
-  - a project cannot be completed in the future;
-  - photo paths must point into `assets/images/`;
-  - FAQ links must start with `#/` or `http(s)://`.
-
 ## Keys and Constraints
 
 - Every table has an `id INT UNSIGNED AUTO_INCREMENT` primary key, except the two link tables. Those use a composite primary key (`model_id, package_id` and `model_id, feature_id`), so the same pair can't be stored twice.
@@ -210,9 +176,6 @@ The application has two roles, plus visitors who are not logged in. Authenticati
 | `locations` | Read | Read | Full CRUD (+ trigger geocoding) |
 | `projects` | Read | Read | Full CRUD |
 | `inquiries` | Create | Create; read own | Read all, update status, delete |
-| `faqs` | Read | Read | Full CRUD |
-
-These rules are enforced from Milestone 4 (JWT middleware). In Milestone 3 all endpoints are still open.
 
 ## External API: OpenStreetMap Nominatim
 
@@ -228,12 +191,6 @@ These rules are enforced from Milestone 4 (JWT middleware). In Milestone 3 all e
   - The location is saved without coordinates.
   - The Locations page still lists every project, and the map simply leaves out places without coordinates.
 - Nominatim's usage policy (identifying User-Agent, at most 1 request per second) is respected by geocoding only on save.
-- **Built in Milestone 3:**
-  - `backend/services/GeocodingService.php`: 5-second timeout, errors written to `error.log`, successful calls to `info.log`, `503` with a friendly message;
-  - `LocationService`, which geocodes when a location is saved or its city/country changes;
-  - the endpoints `GET /geocode`, `POST /locations/{id}/geocode` and `POST /locations/geocode-missing`.
-
-  The map on the Locations page follows in Milestone 4.
 
 ## Where Today's Static Data Will Live
 
@@ -246,15 +203,25 @@ The frontend still reads from static files; the same data is now also in the dat
 | `frontend/js/data/locations.js` | `locations`, `projects` |
 | Contact form (`frontend/js/services/inquiries.js`) | `inquiries` |
 | `frontend/js/data/demo.js` (example users and inquiries for the static Profile/Admin preview) | `users`, `inquiries` |
-| `frontend/js/data/faq.js` | `faqs` (since Milestone 3) |
-| `frontend/js/data/company.js` | Static site content (company name, address, phone). TODO: decide in Milestone 4 whether it also becomes a table, because the brief asks that no hard-coded data is left in the final frontend. |
+| `frontend/js/data/faq.js`, `company.js` | Static site content. TODO: decide whether they also become tables, because the brief asks that no hard-coded data is left in the final frontend. |
 
-Logs are files (`backend/logs/info.log`, `backend/logs/error.log`), not a table.
+Logs are planned as files (`backend/logs/info.log`, `backend/logs/error.log`), not as a table.
 
-## REST Endpoints
+## Draft REST Endpoints (planning notes)
 
-Built in Milestone 3. Every endpoint is documented in Swagger (`/docs/` on the backend), and the README has a summary. Planned for Milestone 4:
-- `POST /auth/register` and `POST /auth/login` (JWT);
-- `GET`/`PUT /users/me`;
-- `GET /inquiries/mine`, which will replace `GET /users/{id}/inquiries` for customers;
-- the role checks from the table above.
+| Method and path | Who | Purpose |
+|---|---|---|
+| `POST /auth/register`, `POST /auth/login` | Guest | Create an account; log in and receive a JWT |
+| `GET /users/me`, `PUT /users/me` | Customer | Own profile |
+| `GET /users`, `PUT /users/{id}`, `DELETE /users/{id}` | Admin | Manage users |
+| `GET /houses`, `GET /houses/{slug}` | Everyone | Models with prices, features and images |
+| `POST /houses`, `PUT /houses/{id}`, `DELETE /houses/{id}` | Admin | Manage models (prices, features and images as sub-resources) |
+| `GET /packages`, `POST`/`PUT`/`DELETE /packages/{id}` | Everyone / Admin | Packages |
+| `GET /features`, `POST`/`PUT`/`DELETE /features/{id}` | Everyone / Admin | Features |
+| `GET /locations`, `POST`/`PUT`/`DELETE /locations/{id}` | Everyone / Admin | Locations (POST/PUT trigger geocoding) |
+| `GET /projects`, `POST`/`PUT`/`DELETE /projects/{id}` | Everyone / Admin | Completed projects |
+| `POST /inquiries` | Guest, Customer | Send an inquiry |
+| `GET /inquiries/mine` | Customer | Own inquiries |
+| `GET /inquiries`, `PATCH /inquiries/{id}`, `DELETE /inquiries/{id}` | Admin | Manage inquiries and their status |
+
+These will be documented with OpenAPI (Swagger) in the backend phase.

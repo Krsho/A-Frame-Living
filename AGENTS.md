@@ -61,7 +61,7 @@ A-Frame Living is a web application for a company that builds A-frame houses in 
 
 ### Backend layers
 
-Built so far: `config/`, `dao/` (Milestone 2), `services/`, `routes/`, OpenAPI docs and the external API (Milestone 3). Middleware (JWT, roles, request logging) comes in Milestone 4. `backend/index.php` is the single entry point (loads classes, registers services with `Flight::register()`, maps the error handler, registers routes). Requests flow in one direction:
+Built so far: `config/` and `dao/` (Milestone 2). Routes, services and middleware come in Milestones 3–4. Requests flow in one direction:
 
 ```
 HTTP request → middleware → routes → services → dao → MySQL
@@ -69,23 +69,15 @@ HTTP request → middleware → routes → services → dao → MySQL
 
 | Folder               | Responsibility                                                                 |
 |----------------------|--------------------------------------------------------------------------------|
-| `backend/middleware` | Runs before routes, for example authentication and request checks (Milestone 4). |
-| `backend/routes`     | One `<Entity>Routes` class per entity, extending `BaseRoutes`. `register()` maps URLs to static methods; each method reads the request, calls ONE service method and sends JSON (`self::send()`). No SQL and no business rules here. The `#[OA\...]` attributes above each method are its OpenAPI documentation; keep them in sync with the code. |
-| `backend/services`   | One `<Entity>Service` per entity, extending `BaseService`. Validation (`Validator`) and business rules (`checkRules()`, `beforeDelete()`). The only layer that calls DAOs. Throws `HttpException` subclasses on errors. `GeocodingService` is the external API (Nominatim). |
+| `backend/middleware` | Runs before routes, for example authentication and request checks.             |
+| `backend/routes`     | Defines FlightPHP endpoints. Reads the request, calls a service, returns JSON. No SQL here. |
+| `backend/services`   | Business logic and validation. Calls DAOs. No direct SQL here.                 |
 | `backend/dao`        | Data Access Objects. The **only** place SQL runs, always through PDO. `BaseDao.php` has the reusable CRUD methods; one `<Entity>Dao.php` per table. |
-| `backend/exceptions` | `HttpExceptions.php`: `ValidationException` (400), `NotFoundException` (404), `ConflictException` (409), `ExternalServiceException` (503). |
-| `backend/utils`      | `Logger` (info.log / error.log) and `ErrorHandler` (every error → JSON; unexpected errors → 500 + error.log). |
-| `backend/docs`       | Swagger UI page (`index.html`) and shared OpenAPI definitions (`OpenApiDefinitions.php`: schemas, common responses). swagger-php needs **one class per `#[OA\Schema]`**. `GET /openapi.json` (`routes/DocsRoutes.php`) generates the document. |
-| `backend/config`     | Configuration. `config.php` is git-ignored; `config.example.php` is the committed template. `AppConfig.php` reads it (`AppConfig::get('nominatim')`); `Database.php` creates the single PDO connection. **Windows file names are case-insensitive:** never create a file whose name differs from an existing one only by case (e.g. `Config.php` next to `config.php`). |
+| `backend/config`     | Configuration. `config.php` is git-ignored; `config.example.php` is the committed template. `Database.php` creates the single PDO connection. |
 | `backend/database`   | `aframe_living.sql`: schema + sample data. Re-import to reset the database.    |
 | `backend/logs`       | Runtime logs. Contents are git-ignored.                                        |
-| `backend/vendor`     | Composer packages (`flightphp/core`, `zircote/swagger-php`). Git-ignored; `composer.json` and `composer.lock` are committed. |
-
-Run the backend locally with `php -S localhost:8080 -t backend backend/index.php`; Swagger is at `http://localhost:8080/docs/`.
 
 **Adding a table:** add it to `backend/database/aframe_living.sql` and `docs/database-plan.md` (including the ERD). Then create a DAO that extends `BaseDao` and lists its writable columns, and add checks to `tests/dao/run-dao-tests.php`.
-
-**Adding an endpoint / entity API:** create `<Entity>Service` (validation + rules) and `<Entity>Routes` (with `#[OA\...]` documentation), register the service in `index.php` with `Flight::register()` and call `<Entity>Routes::register()` there. Add checks to `tests/api/run-api-tests.php`.
 
 ### Tests
 
@@ -93,7 +85,6 @@ Run the backend locally with `php -S localhost:8080 -t backend backend/index.php
 |--------------|--------------------------------------------------------------------------------|
 | `tests/e2e`  | Browser tests (Node + headless Edge/Chrome, no npm packages). Run `node tests/e2e/run-all.mjs` after every change and keep all suites passing; add a suite or checks for new features. See `tests/e2e/README.md`. |
 | `tests/dao`  | Database tests (PHP). `php tests/dao/run-dao-tests.php` rebuilds the separate database `aframe_living_test` from the `.sql` file and tests every DAO. Never point tests at the real `aframe_living` database. |
-| `tests/api`  | REST API tests (PHP, real HTTP). `php tests/api/run-api-tests.php` rebuilds `aframe_living_test` and starts the backend on ports 8091–8094 with `test-bootstrap.php` (test database, fake Nominatim, logs in `tests/api/logs/`). Never call the real Nominatim from tests. Run it after every backend change. |
 
 ## Database
 
@@ -110,10 +101,8 @@ The planned schema (entities, columns, relationships, roles, draft ERD) is in `d
 | CSS classes | block__element--modifier | `house-card__title`, `btn--primary` |
 | JS hooks in HTML | `data-*` attributes (not classes) | `data-contact-form`, `data-nav` |
 | Database tables / columns | snake_case, plural tables, `_id` for foreign keys | `house_models`, `model_id` |
-| REST endpoints | plural nouns, no verbs (the geocoding actions are the documented exception) | `GET /houses/{slug}`, `POST /inquiries` |
-| PHP classes | PascalCase with a layer suffix | `HouseModelService`, `HouseModelDao`, `HouseModelRoutes`, `AuthMiddleware` |
-| Flight service names | camelCase class name | `Flight::houseModelService()` |
-| JSON fields | snake_case, same as the database columns | `price_eur`, `model_id` |
+| REST endpoints | plural nouns, no verbs | `GET /houses/{slug}`, `POST /inquiries` |
+| PHP classes (planned) | PascalCase with a layer suffix | `HouseService`, `HouseDao`, `AuthMiddleware` |
 
 ## Coding Rules
 
@@ -129,10 +118,8 @@ The planned schema (entities, columns, relationships, roles, draft ERD) is in `d
 - Every DAO extends `BaseDao`. Link tables with a composite key (`model_prices`, `model_features`) use their own methods instead of `getById`/`update`/`delete`.
 - `UserDao` never returns `password_hash`, except `getByEmailWithPassword()`, which is for login only.
 - Keep the connection settings in `Database.php`, including MySQL strict mode. Don't open PDO connections anywhere else.
-- Return JSON with appropriate HTTP status codes: 200, 201 (created), 400 (invalid data, with `details` per field), 401/403 (Milestone 4), 404, 409 (duplicate or still in use), 503 (external API down), 500.
-- Validate all input in the service layer with `Validator`. Unknown fields are rejected (400). PUT needs all required fields, PATCH only the sent ones.
-- Routes don't catch exceptions: services throw `HttpException` subclasses, and `ErrorHandler` turns them into JSON. Never send stack traces, SQL or file paths to the client.
-- External API calls need a timeout, must log failures to `error.log` and calls to `info.log`, and must never break the request that triggered them (save without the external data instead).
+- Return JSON with appropriate HTTP status codes (200, 201, 400, 401, 404, 500).
+- Validate all input in the service layer.
 - Hash passwords with `password_hash()` and check them with `password_verify()`.
 - Don't show raw database errors to the client. Log them to `backend/logs/` instead.
 
@@ -163,20 +150,4 @@ The planned schema (entities, columns, relationships, roles, draft ERD) is in `d
     - `Database.php` reading the git-ignored `config.php`;
     - `BaseDao` and a DAO for every table;
     - DAO tests (`tests/dao/`).
-- **Milestone 3:**
-  - Built:
-    - Composer packages `flightphp/core` and `zircote/swagger-php` in `backend/`;
-    - a service with validation and business rules for every entity;
-    - FlightPHP routes for all CRUD operations of all entities;
-    - the error handler (JSON errors, `error.log`);
-    - OpenAPI attributes for every endpoint and the Swagger page at `/docs/`;
-    - the external API (Nominatim) with `GeocodingService` and three endpoints;
-    - the new `faqs` table (11 tables now);
-    - API tests (`tests/api/`).
-- **Not built yet (Milestone 4):**
-  - JWT login and registration (`/auth/...`);
-  - authentication and role middleware (401/403);
-  - request-logging middleware (every request in `info.log`);
-  - connecting the frontend to the API (replacing `frontend/js/data/`), including the map on the Locations page.
-
-  Until then all endpoints are open.
+- **Not built yet:** services, FlightPHP routes, OpenAPI docs, the external API (OpenStreetMap Nominatim) (Milestone 3); JWT, middleware, logging, connecting the frontend to the API (Milestone 4). No Composer packages are installed yet.
