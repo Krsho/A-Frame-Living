@@ -78,6 +78,7 @@ $images = new ModelImageDao();
 $locations = new LocationDao();
 $projects = new ProjectDao();
 $inquiries = new InquiryDao();
+$faqs = new FaqDao();
 
 // ---------------------------------------------------------------------
 // 2. Sample data
@@ -87,7 +88,7 @@ $expectedCounts = [
     'users' => [$users, 4], 'house_models' => [$models, 4], 'packages' => [$packages, 2],
     'model_prices' => [$prices, 8], 'features' => [$features, 6], 'model_features' => [$modelFeatures, 16],
     'model_images' => [$images, 43], 'locations' => [$locations, 14], 'projects' => [$projects, 14],
-    'inquiries' => [$inquiries, 5],
+    'inquiries' => [$inquiries, 5], 'faqs' => [$faqs, 16],
 ];
 foreach ($expectedCounts as $table => [$dao, $expected]) {
     check("sample data: {$table} has {$expected} rows", $dao->count() === $expected, 'rows=' . $dao->count());
@@ -247,6 +248,25 @@ check('users delete: their inquiries are kept, user link set to NULL', $inquirie
 check('inquiries: delete', $inquiries->delete((int) $own['id']) && $inquiries->delete((int) $guest['id']));
 check('packages: delete', $packages->delete((int) $package['id']));
 check('features: delete', $features->delete((int) $feature['id']));
+
+// ---------------------------------------------------------------------
+// 6. Added in Milestone 3: faqs table and lookup methods used by the services
+// ---------------------------------------------------------------------
+
+$ordered = $faqs->getAllOrdered();
+check('faqs: getAllOrdered follows the page order (models first, process last)',
+    $ordered[0]['category'] === 'models' && end($ordered)['category'] === 'process');
+check('faqs: getByCategory', count($faqs->getByCategory('packages')) === 3);
+$faq = $faqs->add(['category' => 'process', 'question' => 'Test?', 'answer' => 'Test answer.', 'sort_order' => 9]);
+check('faqs: add', $faq['question'] === 'Test?' && $faq['link_url'] === null);
+check('faqs: update', $faqs->update((int) $faq['id'], ['link_label' => 'Contact', 'link_url' => '#/contact'])['link_url'] === '#/contact');
+checkThrows('faqs: invalid category rejected (strict mode)', PDOException::class,
+    fn () => $faqs->update((int) $faq['id'], ['category' => 'prices']));
+check('faqs: delete', $faqs->delete((int) $faq['id']) && $faqs->getById((int) $faq['id']) === null);
+
+check('features: getByName', $features->getByName('Fireplace') !== null && $features->getByName('Pool') === null);
+check('model_prices: getForPackage (ROH BAU is used by 4 models)', count($prices->getForPackage(1)) === 4);
+check('projects: getForLocation', count($projects->getForLocation(1)) === 1 && $projects->getForLocation(999) === []);
 
 // ---------------------------------------------------------------------
 

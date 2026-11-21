@@ -6,6 +6,8 @@
  * (git-ignored; see config.example.php for the template).
  */
 
+require_once __DIR__ . '/AppConfig.php';
+
 class Database
 {
     private static ?PDO $connection = null;
@@ -50,18 +52,11 @@ class Database
         self::$connection = null;
     }
 
-    /** The 'db' part of config.php. */
+    /** The 'db' part of config.php (read through the AppConfig class). */
     public static function settings(): array
     {
         if (self::$settings === null) {
-            $file = __DIR__ . '/config.php';
-            if (!is_file($file)) {
-                throw new RuntimeException(
-                    'Missing backend/config/config.php. Copy config.example.php to config.php and fill in your database settings.'
-                );
-            }
-            $config = require $file;
-            self::$settings = $config['db'];
+            self::$settings = AppConfig::get('db');
         }
 
         return self::$settings;
