@@ -53,4 +53,10 @@ class ModelPriceDao extends BaseDao
             [$modelId, $packageId]
         ) > 0;
     }
+
+    /** All prices that use one package (a package with prices should not be deleted). */
+    public function getForPackage(int $packageId): array
+    {
+        return $this->query('SELECT * FROM model_prices WHERE package_id = ? ORDER BY model_id', [$packageId]);
+    }
 }

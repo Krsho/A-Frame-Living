@@ -15,4 +15,9 @@ class FeatureDao extends BaseDao
     {
         return $this->query('SELECT * FROM features WHERE category = ? ORDER BY name', [$category]);
     }
+
+    public function getByName(string $name): ?array
+    {
+        return $this->queryOne('SELECT * FROM features WHERE name = ?', [$name]);
+    }
 }
