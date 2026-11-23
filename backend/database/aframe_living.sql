@@ -1,5 +1,6 @@
 -- =====================================================================
--- A-Frame Living – MySQL database with sample data (Milestone 2)
+-- A-Frame Living – MySQL database with sample data
+-- (Milestone 2; the `faqs` table was added in Milestone 3)
 --
 -- Import (creates the database `aframe_living` and all tables):
 --   phpMyAdmin: Import -> choose this file -> Go
@@ -15,6 +16,7 @@ USE aframe_living;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS faqs;
 DROP TABLE IF EXISTS inquiries;
 DROP TABLE IF EXISTS projects;
 DROP TABLE IF EXISTS locations;
@@ -162,6 +164,19 @@ CREATE TABLE inquiries (
   -- Deleting a user or model keeps the inquiry; the link is set to NULL.
   CONSTRAINT fk_inquiries_user  FOREIGN KEY (user_id)  REFERENCES users (id)        ON DELETE SET NULL,
   CONSTRAINT fk_inquiries_model FOREIGN KEY (model_id) REFERENCES house_models (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Questions and answers for the FAQ page (added in Milestone 3, so the FAQ is not hard-coded in the frontend)
+CREATE TABLE faqs (
+  id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  category   ENUM('models', 'packages', 'customization', 'locations', 'process') NOT NULL,
+  question   VARCHAR(255) NOT NULL,
+  answer     TEXT         NOT NULL,                  -- plain text; the frontend escapes it
+  link_label VARCHAR(100) NULL,                      -- optional link shown under the answer
+  link_url   VARCHAR(255) NULL,                      -- e.g. "#/contact"
+  sort_order INT UNSIGNED NOT NULL DEFAULT 0,        -- order inside the category
+  PRIMARY KEY (id),
+  KEY idx_faqs_category (category, sort_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
@@ -313,3 +328,24 @@ INSERT INTO inquiries (id, user_id, model_id, name, email, subject, message, sta
   (3, 3, 4, 'Emir Hadžić', 'emir.hadzic@example.com', 'Inquiry about the Continental model', 'I am interested in the Continental model. Could you send me more information about the fireplace and the windows?', 'new', '2026-10-22 09:30:00'),
   (4, NULL, NULL, 'Marko Petrović', 'marko.p@example.com', 'Do you build near Mostar?', 'Do you also build in the Mostar area? We are thinking about a small house for weekends.', 'new', '2026-10-24 09:30:00'),
   (5, 4, 1, 'Lena Marić', 'lena.maric@example.com', 'Atlantic as a weekend house', 'We would like an Atlantic as a weekend house. Thank you for the information.', 'closed', '2026-10-05 09:30:00');
+
+-- FAQ (texts written for the university assignment, taken from the Milestone 1 FAQ page).
+-- Answers that listed prices, sizes or project counts now point to the page that shows them,
+-- so those numbers are stored only once (in house_models, model_prices and projects).
+INSERT INTO faqs (id, category, question, answer, link_label, link_url, sort_order) VALUES
+  (1, 'models', 'Which A-frame models do you offer?', 'We offer four models: Atlantic, Norway, Scandinavia and Continental. Every model has a living room, a kitchen and a gallery as a second floor.', 'Compare the models side by side', '#/houses?section=compare', 1),
+  (2, 'models', 'How much does an A-frame house cost?', 'Each model has a fixed price in each package (ROH BAU and Turnkey). You can see all current prices on the Models page.', 'See the prices', '#/houses', 2),
+  (3, 'models', 'Is the land included in the price?', 'No. The prices cover the house only. If you are still looking for a plot, we are happy to give you our opinion on whether it suits an A-frame.', NULL, NULL, 3),
+  (4, 'models', 'Can the final price differ from the listed price?', 'The listed prices are for the standard model. The final price can change if you choose extra options or layout changes, or if your plot needs extra work such as a difficult access road. You always receive a written offer before you sign anything.', NULL, NULL, 4),
+  (5, 'packages', 'What is the difference between ROH BAU and Turnkey?', 'ROH BAU: the house is completely finished on the outside, and the interior is left for you to design and finish yourself. Turnkey: everything is done except the furniture, including a finished kitchen and bathroom.', 'See exactly who does what', '#/how-to-buy?section=packages', 1),
+  (6, 'packages', 'Is furniture included in the Turnkey package?', 'No. Turnkey includes everything except the furniture – the kitchen and bathroom are finished, so you only need to bring your own furniture.', NULL, NULL, 2),
+  (7, 'packages', 'Can I start with ROH BAU and have you finish the interior later?', 'Yes. Many owners start with ROH BAU and decide later. Contact us when you are ready and we will make you an offer for the interior work.', NULL, NULL, 3),
+  (8, 'customization', 'Can I change the layout of a model?', 'Smaller changes – such as window positions or the layout of interior walls – can usually be discussed during planning. Larger changes to the structure may affect the price and the permit, so we look at them together before the offer.', NULL, NULL, 1),
+  (9, 'customization', 'Can I choose the colours and materials?', 'Yes. You can choose colours for the roof and cladding, and for Turnkey projects also the interior finishes. We will show you the options during the consultation.', NULL, NULL, 2),
+  (10, 'locations', 'Where have you built so far?', 'We have completed projects across Bosnia and Herzegovina, from Velika Kladuša to Bjelašnica. The Locations page lists every project with its model.', 'See all locations', '#/locations', 1),
+  (11, 'locations', 'Do you build outside Bosnia and Herzegovina?', 'All our completed projects are in Bosnia and Herzegovina. If your plot is elsewhere, send us an inquiry and we will tell you whether we can help.', 'Send an inquiry', '#/contact', 2),
+  (12, 'locations', 'Can an A-frame be built in the mountains?', 'Yes – several of our projects stand on mountain plots, for example on Kupres, Blidinje and Bjelašnica. The steep roof is well suited to snow. Access for delivery and construction is checked during the site visit.', NULL, NULL, 3),
+  (13, 'process', 'How do I start?', 'Send us an inquiry with the model you like and where your plot is. We will get back to you to arrange a first conversation.', 'See all seven steps', '#/how-to-buy', 1),
+  (14, 'process', 'Do I need a building permit?', 'In most cases, yes. The requirements depend on your municipality. We prepare the drawings and help you put together the documentation for the application.', NULL, NULL, 2),
+  (15, 'process', 'How long does it take to build?', 'It depends on the model, the package, the permit and the season. You receive a schedule together with your offer, and we keep you updated during construction.', NULL, NULL, 3),
+  (16, 'process', 'How does payment work?', 'Payment terms are agreed in the contract and are usually split into stages that follow the progress of construction.', NULL, NULL, 4);
